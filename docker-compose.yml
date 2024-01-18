@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  server:
+    container_name: springboot-rest
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      springboot-postgres-net:
+    restart: on-failure
+    depends_on:
+      - db
+  db:
+    container_name: db
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mydb
+    networks:
+      springboot-postgres-net:
+
+networks:
+  springboot-postgres-net:
