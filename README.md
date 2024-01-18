@@ -41,7 +41,7 @@ Or in Intellij/ Or any other IDE/Editor
 ```bash
 ./docker-script.bat
 ```
-REST API will start running at <http://localhost:443>
+REST API will start running at <http://localhost:8080>
 
 **4. You can stop the backend from running with**
 
@@ -50,5 +50,5 @@ docker compose down
 ```
 
 ## Endpoints
-+ http://localhost:443/swagger-ui/index.html - Every endpoint is documented here.
++ http://localhost:8080/swagger-ui/index.html - Every endpoint is documented here.
 
