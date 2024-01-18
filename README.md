@@ -34,12 +34,12 @@ replace < path to project > with the path where you cloned the repository
 
 In Command Prompt
 ```bash
-docker.bat
+docker-script.bat
 ```
 
 Or in Intellij/ Or any other IDE/Editor
 ```bash
-./docker.bat
+./docker-script.bat
 ```
 REST API will start running at <http://localhost:443>
 

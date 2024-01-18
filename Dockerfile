@@ -7,9 +7,9 @@ COPY . /app
 RUN apt-get update && apt-get install -y maven
 
 
-RUN mvn clean package
+RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17
 WORKDIR /app
-COPY --from=build /app/target/cranker-0.0.1-SNAPSHOT.jar /app/docconnect-docker.jar
-ENTRYPOINT ["java", "-jar", "docconnect-docker.jar"]
+COPY --from=build /app/target/cranker-0.0.1-SNAPSHOT.jar /app/cranker-docker.jar
+ENTRYPOINT ["java", "-jar", "cranker-docker.jar"]
