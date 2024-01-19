@@ -27,7 +27,7 @@ public class AuthenticationController {
             responseCode = "200",
             description = "Http Status 200 SUCCESS"
     )
-    @PostMapping(value = {"/login", "signin"})
+    @PostMapping("signin")
     public ResponseEntity<JWTAuthenticationResponse> login(@Valid @RequestBody LoginRequestDTO loginDTO) {
         return ResponseEntity.ok(authenticationService.login(loginDTO));
     }
