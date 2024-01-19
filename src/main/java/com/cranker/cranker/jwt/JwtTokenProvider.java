@@ -1,8 +1,6 @@
-package com.cranker.cranker.security.jwt;
+package com.cranker.cranker.jwt;
 
 
-import com.cranker.cranker.exception.ResourceNotFoundException;
-import com.cranker.cranker.user.User;
 import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.utils.Messages;
 import io.jsonwebtoken.*;

@@ -1,9 +1,9 @@
 package com.cranker.cranker.security;
 
 
-import com.cranker.cranker.security.jwt.JwtAuthenticationEntryPoint;
-import com.cranker.cranker.security.jwt.JwtAuthenticationFilter;
-import com.cranker.cranker.security.jwt.JwtTokenProvider;
+import com.cranker.cranker.jwt.JwtAuthenticationEntryPoint;
+import com.cranker.cranker.jwt.JwtAuthenticationFilter;
+import com.cranker.cranker.jwt.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.beans.factory.annotation.Value;

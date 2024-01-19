@@ -1,4 +1,4 @@
-package com.cranker.cranker.security.jwt;
+package com.cranker.cranker.jwt;
 
 public enum TokenType {
     ACCESS,
