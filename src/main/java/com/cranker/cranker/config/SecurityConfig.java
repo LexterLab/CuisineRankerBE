@@ -1,4 +1,4 @@
-package com.cranker.cranker.security;
+package com.cranker.cranker.config;
 
 
 import com.cranker.cranker.jwt.JwtAuthenticationEntryPoint;
