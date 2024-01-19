@@ -17,9 +17,9 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
 
-    public JWTAuthenticationResponse login(LoginRequestDTO loginDTO){
+    public JWTAuthenticationResponse login(LoginRequestDTO loginRequestDTO){
         Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password()));
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         JWTAuthenticationResponse authenticationResponse = new JWTAuthenticationResponse();
         authenticationResponse.setAccessToken(tokenProvider.generateToken(authentication.getName(), TokenType.ACCESS));
