@@ -3,6 +3,7 @@ package com.cranker.cranker.authentication;
 import com.cranker.cranker.jwt.JWTAuthenticationResponse;
 import com.cranker.cranker.jwt.JwtTokenProvider;
 import com.cranker.cranker.jwt.TokenType;
+import com.cranker.cranker.utils.Messages;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +18,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
 
-    public JWTAuthenticationResponse login(LoginRequestDTO loginRequestDTO){
+    public JWTAuthenticationResponse login(LoginRequestDTO loginRequestDTO) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -27,4 +28,8 @@ public class AuthenticationService {
         return authenticationResponse;
     }
 
+    public String logout() {
+        SecurityContextHolder.clearContext();
+        return Messages.SUCCESSFUL_LOGOUT;
+    }
 }

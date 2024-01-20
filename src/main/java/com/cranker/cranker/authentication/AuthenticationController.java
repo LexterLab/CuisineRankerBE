@@ -31,4 +31,17 @@ public class AuthenticationController {
     public ResponseEntity<JWTAuthenticationResponse> login(@Valid @RequestBody LoginRequestDTO loginDTO) {
         return ResponseEntity.ok(authenticationService.login(loginDTO));
     }
+
+    @Operation(
+            summary = "Logout User REST API",
+            description = "Logout User REST API is used to clear context"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Http Status 200 SUCCESS"
+    )
+    @PostMapping("signout")
+    public ResponseEntity<String> logout() {
+        return ResponseEntity.ok(authenticationService.logout());
+    }
 }
