@@ -1,10 +1,14 @@
 package com.cranker.cranker.authentication;
 
+import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.jwt.JWTAuthenticationResponse;
 import com.cranker.cranker.jwt.JwtTokenProvider;
 import com.cranker.cranker.jwt.TokenType;
+import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.utils.Messages;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,6 +21,8 @@ public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+    private final UserRepository userRepository;
+    private final AuthenticationHelper helper;
 
     public JWTAuthenticationResponse login(LoginRequestDTO loginRequestDTO) {
         Authentication authentication = authenticationManager
@@ -31,5 +37,15 @@ public class AuthenticationService {
     public String logout() {
         SecurityContextHolder.clearContext();
         return Messages.SUCCESSFUL_LOGOUT;
+    }
+
+    public String signUp(SignUpRequestDTO requestDTO){
+        if (userRepository.existsByEmailIgnoreCase(requestDTO.email())) {
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_EXISTS);
+        }
+
+        User user = helper.buildUser(requestDTO);
+        userRepository.save(user);
+        return Messages.USER_SUCCESSFULLY_REGISTERED;
     }
 }

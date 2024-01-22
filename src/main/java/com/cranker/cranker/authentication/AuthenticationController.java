@@ -44,4 +44,17 @@ public class AuthenticationController {
     public ResponseEntity<String> logout() {
         return ResponseEntity.ok(authenticationService.logout());
     }
+
+    @Operation(
+            summary = "Sign Up REST API",
+            description = "Sign Up REST API  is used to create a new user"
+    )
+    @ApiResponse(
+            responseCode = "201",
+            description = "Http Status 201 CREATED"
+    )
+    @PostMapping("signup")
+    public ResponseEntity<String> signup(@Valid @RequestBody SignUpRequestDTO requestDTO) {
+        return ResponseEntity.ok(authenticationService.signUp(requestDTO));
+    }
 }
