@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -39,6 +40,7 @@ public class AuthenticationService {
         return Messages.SUCCESSFUL_LOGOUT;
     }
 
+    @Transactional
     public String signUp(SignUpRequestDTO requestDTO){
         if (userRepository.existsByEmailIgnoreCase(requestDTO.email())) {
             throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_EXISTS);
