@@ -1,6 +1,6 @@
 package com.cranker.cranker.jwt;
 
-public enum TokenType {
+public enum JwtType {
     ACCESS,
     REFRESH
 }
