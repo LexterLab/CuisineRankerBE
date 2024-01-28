@@ -4,13 +4,12 @@ import com.cranker.cranker.jwt.JWTAuthenticationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/auth")
@@ -37,12 +36,13 @@ public class AuthenticationController {
             description = "Logout User REST API is used to clear context"
     )
     @ApiResponse(
-            responseCode = "200",
-            description = "Http Status 200 SUCCESS"
+            responseCode = "204",
+            description = "Http Status 204 NO CONTENT"
     )
     @PostMapping("signout")
     public ResponseEntity<String> logout() {
-        return ResponseEntity.ok(authenticationService.logout());
+        authenticationService.logout();
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(
@@ -54,7 +54,22 @@ public class AuthenticationController {
             description = "Http Status 201 CREATED"
     )
     @PostMapping("signup")
-    public ResponseEntity<String> signup(@Valid @RequestBody SignUpRequestDTO requestDTO) {
-        return ResponseEntity.ok(authenticationService.signUp(requestDTO));
+    public ResponseEntity<String> signup(@Valid @RequestBody SignUpRequestDTO requestDTO) throws MessagingException {
+        String response = authenticationService.signUp(requestDTO);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Verify Email  REST API",
+            description = "Verify Email  REST API is used to verify user's email"
+    )
+    @ApiResponse(
+            responseCode = "204",
+            description = "Http Status 204 NO CONTENT"
+    )
+    @PatchMapping("confirm-email")
+    public ResponseEntity<String> confirmEmail(@RequestParam String value)  {
+        authenticationService.confirmEmail(value);
+        return ResponseEntity.noContent().build();
     }
 }
