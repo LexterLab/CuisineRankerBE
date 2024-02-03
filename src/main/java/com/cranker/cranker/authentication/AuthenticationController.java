@@ -1,6 +1,10 @@
 package com.cranker.cranker.authentication;
 
-import com.cranker.cranker.jwt.JWTAuthenticationResponse;
+import com.cranker.cranker.authentication.payload.ForgotPasswordRequestDTO;
+import com.cranker.cranker.authentication.payload.LoginRequestDTO;
+import com.cranker.cranker.authentication.payload.ResetPasswordRequestDTO;
+import com.cranker.cranker.authentication.payload.SignUpRequestDTO;
+import com.cranker.cranker.authentication.jwt.JWTAuthenticationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,7 +44,7 @@ public class AuthenticationController {
             description = "Http Status 204 NO CONTENT"
     )
     @PostMapping("signout")
-    public ResponseEntity<String> logout() {
+    public ResponseEntity<Void> logout() {
         authenticationService.logout();
         return ResponseEntity.noContent().build();
     }
@@ -60,7 +64,7 @@ public class AuthenticationController {
     }
 
     @Operation(
-            summary = "Verify Email  REST API",
+            summary = "Verify Email REST API",
             description = "Verify Email  REST API is used to verify user's email"
     )
     @ApiResponse(
@@ -68,8 +72,35 @@ public class AuthenticationController {
             description = "Http Status 204 NO CONTENT"
     )
     @PatchMapping("confirm-email")
-    public ResponseEntity<String> confirmEmail(@RequestParam String value)  {
+    public ResponseEntity<Void> confirmEmail(@RequestParam String value) {
         authenticationService.confirmEmail(value);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Forgot password REST API",
+            description = "Forgot password REST API is used to send reset password url to user's email"
+    )
+    @ApiResponse(
+            responseCode = "201",
+            description = "Http Status 201 CREATED"
+    )
+    @PostMapping("forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO requestDTO) throws MessagingException {
+        authenticationService.forgotPassword(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+    @Operation(
+            summary = "Reset password REST API",
+            description = "Reset password REST API is used to  reset user's password with new one"
+    )
+    @ApiResponse(
+            responseCode = "204",
+            description = "Http Status 204 NO CONTENT"
+    )
+    @PatchMapping("reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestParam String value, @Valid @RequestBody ResetPasswordRequestDTO requestDTO) {
+        authenticationService.resetPassword(value, requestDTO);
         return ResponseEntity.noContent().build();
     }
 }
