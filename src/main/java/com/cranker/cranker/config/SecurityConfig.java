@@ -1,13 +1,11 @@
 package com.cranker.cranker.config;
 
 
-import com.cranker.cranker.jwt.JwtAuthenticationEntryPoint;
-import com.cranker.cranker.jwt.JwtAuthenticationFilter;
-import com.cranker.cranker.jwt.JwtTokenProvider;
+import com.cranker.cranker.authentication.jwt.JwtAuthenticationEntryPoint;
+import com.cranker.cranker.authentication.jwt.JwtAuthenticationFilter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,7 +17,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;

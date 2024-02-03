@@ -1,4 +1,4 @@
-package com.cranker.cranker.authentication;
+package com.cranker.cranker.authentication.payload;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;

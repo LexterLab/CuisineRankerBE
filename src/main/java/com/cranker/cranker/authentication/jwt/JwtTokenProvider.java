@@ -1,4 +1,4 @@
-package com.cranker.cranker.jwt;
+package com.cranker.cranker.authentication.jwt;
 
 
 import com.cranker.cranker.utils.Messages;
