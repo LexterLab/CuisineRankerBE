@@ -34,4 +34,15 @@ public class EmailSender {
         helper.setSubject("Email Confirmation");
         sender.send(message);
     }
+
+    public void sendResetPasswordEmail(User user, String link) throws MessagingException {
+        Context context = new Context(Locale.ENGLISH, Map.of("firstName", user.getFirstName(), "link", link));
+        MimeMessage message = sender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+        helper.setFrom(properties.getEmailSender());
+        helper.setText(engine.process("reset-password", context), true);
+        helper.setTo(user.getEmail());
+        helper.setSubject("Reset Your Password");
+        sender.send(message);
+    }
 }
