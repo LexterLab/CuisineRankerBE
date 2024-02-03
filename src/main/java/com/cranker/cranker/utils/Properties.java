@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 public class Properties {
     @Value("${email.from}")
     private String emailSender;
-    @Value("${email.uri}")
-    private String emailURI;
+    @Value("${email.url}")
+    private String emailURL;
+    @Value("${reset.url}")
+    private String resetURL;
 }

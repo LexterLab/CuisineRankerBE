@@ -1,5 +1,6 @@
 package com.cranker.cranker.authentication;
 
+import com.cranker.cranker.authentication.payload.SignUpRequestDTO;
 import com.cranker.cranker.role.Role;
 import com.cranker.cranker.role.RoleRepository;
 import com.cranker.cranker.user.User;

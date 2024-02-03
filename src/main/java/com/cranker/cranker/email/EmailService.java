@@ -19,4 +19,10 @@ public class EmailService {
     public void sendConfirmationEmail(User user, String link, String code) throws MessagingException {
         sender.sendConfirmationEmail(user, link, code);
     }
+
+    @Async
+    @Transactional
+    public void sendResetPasswordEmail(User user, String link) throws MessagingException {
+        sender.sendResetPasswordEmail(user, link);
+    }
 }

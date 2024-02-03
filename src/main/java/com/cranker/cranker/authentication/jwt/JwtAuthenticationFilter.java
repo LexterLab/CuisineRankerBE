@@ -1,4 +1,4 @@
-package com.cranker.cranker.jwt;
+package com.cranker.cranker.authentication.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

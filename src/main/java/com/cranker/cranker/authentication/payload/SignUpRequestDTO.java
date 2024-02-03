@@ -1,5 +1,6 @@
-package com.cranker.cranker.authentication;
+package com.cranker.cranker.authentication.payload;
 
+import com.cranker.cranker.authentication.payload.validator.PasswordValueMatches;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -7,6 +8,12 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.Length;
 
+@PasswordValueMatches.List({
+        @PasswordValueMatches(
+                field = "password",
+                fieldMatch = "matchingPassword"
+        )
+})
 public record SignUpRequestDTO(
         @Schema(example = "James")
         @NotEmpty(message = "Please enter a first name.")
