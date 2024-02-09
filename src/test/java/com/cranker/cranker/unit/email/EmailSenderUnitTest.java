@@ -1,0 +1,91 @@
+package com.cranker.cranker.unit.email;
+
+import com.cranker.cranker.email.EmailSender;
+import com.cranker.cranker.user.User;
+import com.cranker.cranker.utils.Properties;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Session;
+import jakarta.mail.internet.MimeMessage;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class EmailSenderUnitTest {
+
+    @Mock
+    private JavaMailSender javaMailSender;
+    @Mock
+    private TemplateEngine engine;
+
+    @Mock
+    private Properties properties;
+
+    @InjectMocks
+    private EmailSender emailSender;
+
+    @Test
+    void shouldSendConfirmationEmail() throws MessagingException {
+        User user = new User();
+        user.setFirstName("John");
+        user.setEmail("test@example.com");
+
+
+        String confirmationLink = "https://example.com/confirm";
+        String code = "123456";
+
+
+        when(properties.getEmailSender()).thenReturn("sender@example.com");
+
+
+        String emailContent = "Mock email content";
+        when(engine.process(anyString(), any(Context.class))).thenReturn(emailContent);
+
+
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+
+        emailSender.sendConfirmationEmail(user, confirmationLink, code);
+
+
+        verify(javaMailSender).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void shouldSendResetPasswordEmail() throws MessagingException {
+        User user = new User();
+        user.setFirstName("John");
+        user.setEmail("test@example.com");
+
+
+        String resetLink = "https://example.com/confirm";
+
+
+        when(properties.getEmailSender()).thenReturn("sender@example.com");
+
+
+        String emailContent = "Mock email content";
+        when(engine.process(anyString(), any(Context.class))).thenReturn(emailContent);
+
+
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+
+        emailSender.sendResetPasswordEmail(user, resetLink);
+
+
+        verify(javaMailSender).send(any(MimeMessage.class));
+    }
+}
