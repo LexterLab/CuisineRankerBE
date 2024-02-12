@@ -8,6 +8,7 @@ import com.cranker.cranker.token.TokenType;
 import com.cranker.cranker.token.impl.EmailConfirmationTokenService;
 import com.cranker.cranker.user.User;
 import com.cranker.cranker.user.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,8 +19,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EmailConfirmationTokenServiceUnitTest {
@@ -35,6 +35,10 @@ public class EmailConfirmationTokenServiceUnitTest {
     private EmailConfirmationTokenService emailConfirmationTokenService;
 
 
+    @AfterEach
+    void tearDown() {
+        reset(userRepository, tokenRepository, tokenHelper);
+    }
 
     @Test
     public void shouldConfirmTokenWhenProvidedValidToken() {

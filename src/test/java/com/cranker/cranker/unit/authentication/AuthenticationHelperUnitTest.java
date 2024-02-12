@@ -5,6 +5,8 @@ import com.cranker.cranker.authentication.payload.SignUpRequestDTO;
 import com.cranker.cranker.role.Role;
 import com.cranker.cranker.role.RoleRepository;
 import com.cranker.cranker.user.User;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,6 +29,16 @@ public class AuthenticationHelperUnitTest {
     private PasswordEncoder passwordEncoder;
     @InjectMocks
     private AuthenticationHelper authenticationHelper;
+
+
+    @BeforeEach
+    void setUp() {
+        reset(roleRepository, passwordEncoder);
+    }
+    @AfterEach
+    void tearDown() {
+        reset(roleRepository, passwordEncoder);
+    }
 
     @Test
     void shouldSetUserRoleToUserIfRolePresent() {

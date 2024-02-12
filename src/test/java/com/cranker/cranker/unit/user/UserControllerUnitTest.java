@@ -4,6 +4,7 @@ import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.user.UserController;
 import com.cranker.cranker.user.UserDTO;
 import com.cranker.cranker.user.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,8 +19,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerUnitTest {
@@ -34,6 +34,12 @@ class UserControllerUnitTest {
     void setUp() {
         authentication = mock(Authentication.class);
     }
+
+    @AfterEach
+    void tearDown() {
+        reset(userService);
+    }
+
 
     @Test
     public void shouldReturnUserInfoWhenGivenValidUsernameOrEmail() {

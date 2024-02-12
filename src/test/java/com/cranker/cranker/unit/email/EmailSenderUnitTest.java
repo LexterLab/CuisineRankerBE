@@ -6,6 +6,7 @@ import com.cranker.cranker.utils.Properties;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,8 +18,7 @@ import org.thymeleaf.context.Context;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EmailSenderUnitTest {
@@ -33,6 +33,11 @@ public class EmailSenderUnitTest {
 
     @InjectMocks
     private EmailSender emailSender;
+
+    @AfterEach
+    void tearDown() {
+        reset(engine, properties);
+    }
 
     @Test
     void shouldSendConfirmationEmail() throws MessagingException {
