@@ -1,9 +1,6 @@
-package com.cranker.cranker.security.jwt;
+package com.cranker.cranker.authentication.jwt;
 
 
-import com.cranker.cranker.exception.ResourceNotFoundException;
-import com.cranker.cranker.user.User;
-import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.utils.Messages;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -28,18 +25,12 @@ public class JwtTokenProvider {
     @Value("${app.jwt-refresh-expiration-miliseconds}")
     private long jwtRefreshExpiry;
 
-    private final UserRepository userRepository;
 
-
-    public JwtTokenProvider(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    public String generateToken(String username, TokenType tokenType) {
+    public String generateToken(String username, JwtType jwtType) {
         Date currentDate = new Date();
         Date expireDate;
 
-        if (tokenType.equals(TokenType.ACCESS)) {
+        if (jwtType.equals(JwtType.ACCESS)) {
             expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
         } else {
             expireDate = new Date(currentDate.getTime() + jwtRefreshExpiry);

@@ -1,4 +1,4 @@
-package com.cranker.cranker.security.jwt;
+package com.cranker.cranker.authentication.jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
