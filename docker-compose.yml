@@ -23,5 +23,22 @@ services:
     networks:
       springboot-postgres-net:
 
+  redis:
+      container_name: redis
+      image: redis
+      ports:
+        - "6379:6379"
+      networks:
+        - springboot-postgres-net
+
+  maildev:
+        container_name: maildev
+        image: djfarrelly/maildev
+        ports:
+          - "1025:1025"
+          - "1080:1080"
+        networks:
+          - springboot-postgres-net
+
 networks:
   springboot-postgres-net:
