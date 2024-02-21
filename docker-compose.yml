@@ -32,13 +32,17 @@ services:
         - springboot-postgres-net
 
   maildev:
-        container_name: maildev
-        image: djfarrelly/maildev
-        ports:
-          - "1025:1025"
-          - "1080:1080"
-        networks:
-          - springboot-postgres-net
+    container_name: maildev
+    image: maildev/maildev
+    environment:
+      - MAILDEV_WEB_PORT=1080
+      - MAILDEV_SMTP_PORT=1025
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    networks:
+      - springboot-postgres-net
+
 
 networks:
   springboot-postgres-net:
