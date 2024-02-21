@@ -1,5 +1,6 @@
 package com.cranker.cranker.authentication;
 
+import com.cranker.cranker.authentication.jwt.JwtRefreshRequestDTO;
 import com.cranker.cranker.authentication.payload.ForgotPasswordRequestDTO;
 import com.cranker.cranker.authentication.payload.LoginRequestDTO;
 import com.cranker.cranker.authentication.payload.ResetPasswordRequestDTO;
@@ -106,5 +107,21 @@ public class AuthenticationController {
     public ResponseEntity<Void> resetPassword(@RequestParam String value, @Valid @RequestBody ResetPasswordRequestDTO requestDTO) {
         authenticationService.resetPassword(value, requestDTO);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @Operation(
+            summary = "Refresh token REST API",
+            description = "Reset password REST API is used to refresh user's access token"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "201", description = "Http Status 201 CREATED"),
+            @ApiResponse( responseCode = "400", description = "Http Status 400 BAD REQUEST"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @PostMapping("refresh-token")
+    public ResponseEntity<JWTAuthenticationResponse> refreshToken(@RequestBody @Valid JwtRefreshRequestDTO requestDTO) {
+        JWTAuthenticationResponse response = authenticationService.refreshToken(requestDTO);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }

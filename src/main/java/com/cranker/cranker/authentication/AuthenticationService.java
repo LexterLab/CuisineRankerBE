@@ -1,6 +1,7 @@
 package com.cranker.cranker.authentication;
 
 import com.cranker.cranker.authentication.jwt.JWTAuthenticationResponse;
+import com.cranker.cranker.authentication.jwt.JwtRefreshRequestDTO;
 import com.cranker.cranker.authentication.jwt.JwtTokenProvider;
 import com.cranker.cranker.authentication.jwt.JwtType;
 import com.cranker.cranker.authentication.payload.ForgotPasswordRequestDTO;
@@ -90,5 +91,17 @@ public class AuthenticationService {
 
         String resetURL = properties.getResetURL() + resetPasswordTokenService.generateToken(user);
         emailService.sendResetPasswordEmail(user, resetURL);
+    }
+
+    @Transactional
+    public JWTAuthenticationResponse refreshToken(JwtRefreshRequestDTO requestDTO) {
+        tokenProvider.validateToken(requestDTO.refreshToken());
+        String email = tokenProvider.getUsername(requestDTO.refreshToken());
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+        JWTAuthenticationResponse response = new JWTAuthenticationResponse();
+        response.setRefreshToken(requestDTO.refreshToken());
+        response.setAccessToken(tokenProvider.generateToken(user.getEmail(), JwtType.ACCESS));
+        return response;
     }
 }
