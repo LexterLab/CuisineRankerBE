@@ -26,6 +26,7 @@ public class UserController {
     )
     @ApiResponses( value = {
             @ApiResponse( responseCode = "200", description = "Http Status 200 SUCCESS"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
             @ApiResponse( responseCode = "403", description = "Http Status 403 FORBIDDEN"),
             @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
     })
