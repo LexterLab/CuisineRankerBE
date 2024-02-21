@@ -1,15 +1,15 @@
 package com.cranker.cranker.authentication.jwt;
 
 
+import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.utils.Messages;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.security.Key;
 import java.util.Date;
 
@@ -59,8 +59,7 @@ public class JwtTokenProvider {
     }
 
 
-    public boolean validateToken(String token, HttpServletResponse response) throws IOException {
-        response.setContentType("application/json");
+    public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key())
@@ -68,25 +67,13 @@ public class JwtTokenProvider {
                     .parse(token);
             return true;
         } catch (MalformedJwtException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write(Messages.INVALID_JWT_TOKEN);
-            response.getWriter().flush();
-            return false;
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.INVALID_JWT_TOKEN);
         } catch (ExpiredJwtException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write(Messages.EXPIRED_JWT_TOKEN);
-            response.getWriter().flush();
-            return false;
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.EXPIRED_JWT_TOKEN);
         } catch (UnsupportedJwtException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write(Messages.UNSUPPORTED_JWT_TOKEN);
-            response.getWriter().flush();
-            return false;
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.UNSUPPORTED_JWT_TOKEN);
         } catch (IllegalArgumentException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write(Messages.JWT_CLAIM_EMPTY);
-            response.getWriter().flush();
-            return false;
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.JWT_CLAIM_EMPTY);
         }
     }
 }
