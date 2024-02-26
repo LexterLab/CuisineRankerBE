@@ -3,6 +3,7 @@ package com.cranker.cranker.unit.authentication;
 import com.cranker.cranker.authentication.AuthenticationController;
 import com.cranker.cranker.authentication.AuthenticationService;
 import com.cranker.cranker.authentication.jwt.JWTAuthenticationResponse;
+import com.cranker.cranker.authentication.jwt.JwtRefreshRequestDTO;
 import com.cranker.cranker.authentication.payload.ForgotPasswordRequestDTO;
 import com.cranker.cranker.authentication.payload.LoginRequestDTO;
 import com.cranker.cranker.authentication.payload.ResetPasswordRequestDTO;
@@ -100,4 +101,19 @@ public class AuthenticationControllerUnitTest {
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
+
+    @Test
+    void shouldRespondWithRefreshTokenAndCreatedStatusWhenRefreshingTokens() {
+        JwtRefreshRequestDTO requestDTO = new JwtRefreshRequestDTO("refresh_token");
+        JWTAuthenticationResponse authenticationResponse = new JWTAuthenticationResponse
+                ("access_token", "bearer", "refresh_token");
+
+        when(authenticationService.refreshToken(requestDTO)).thenReturn(authenticationResponse);
+
+        ResponseEntity<JWTAuthenticationResponse> response = authenticationController.refreshToken(requestDTO);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(authenticationResponse, response.getBody());
+    }
+
 }
