@@ -8,6 +8,7 @@ import com.cranker.cranker.authentication.payload.ForgotPasswordRequestDTO;
 import com.cranker.cranker.authentication.payload.LoginRequestDTO;
 import com.cranker.cranker.authentication.payload.ResetPasswordRequestDTO;
 import com.cranker.cranker.authentication.payload.SignUpRequestDTO;
+import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.utils.Messages;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -114,6 +116,15 @@ public class AuthenticationControllerUnitTest {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(authenticationResponse, response.getBody());
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundWhenNoSuchUserExistsWhenProvidingRefreshToken() {
+        JwtRefreshRequestDTO requestDTO = new JwtRefreshRequestDTO("refresh_token");
+
+        when(authenticationService.refreshToken(requestDTO)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> authenticationController.refreshToken(requestDTO));
     }
 
 }
