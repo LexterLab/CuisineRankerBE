@@ -6,8 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum RecipeType {
-    CUSTOM("Custom"),
-    SAVED("Saved");
+    CUSTOM("Personal");
 
     private final String name;
 }
