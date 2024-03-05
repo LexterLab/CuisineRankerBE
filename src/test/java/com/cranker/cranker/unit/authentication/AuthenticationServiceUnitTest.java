@@ -5,10 +5,7 @@ import com.cranker.cranker.authentication.AuthenticationService;
 import com.cranker.cranker.authentication.jwt.JWTAuthenticationResponse;
 import com.cranker.cranker.authentication.jwt.JwtTokenProvider;
 import com.cranker.cranker.authentication.jwt.JwtType;
-import com.cranker.cranker.authentication.payload.ForgotPasswordRequestDTO;
-import com.cranker.cranker.authentication.payload.LoginRequestDTO;
-import com.cranker.cranker.authentication.payload.ResetPasswordRequestDTO;
-import com.cranker.cranker.authentication.payload.SignUpRequestDTO;
+import com.cranker.cranker.authentication.payload.*;
 import com.cranker.cranker.email.EmailService;
 import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
@@ -33,6 +30,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -174,6 +172,65 @@ public class AuthenticationServiceUnitTest {
 
         verify(userRepository).save(user);
         assertThat(user.getPassword()).isEqualTo(newPassword);
+    }
+
+    @Test
+    void shouldUpdateUserPassword() throws MessagingException {
+        String email = "user@gmail.com";
+        String oldPassword = "oldPassword";
+        String encodedPassword = "encodedPassword";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(encodedPassword);
+
+
+        ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO(oldPassword, "newPass",
+                "newPass");
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(oldPassword, encodedPassword)).thenReturn(true);
+        when(userRepository.save(user)).thenReturn(user);
+        doNothing().when(emailService).sendChangedPasswordEmail(user);
+
+        authenticationService.changePassword(requestDTO, email);
+
+        verify(emailService).sendChangedPasswordEmail(user);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void shouldThrowNotFoundWhenNoUserExistByEmailWhenChangingPassword() {
+        String email = "user@gmail.com";
+        String oldPassword = "oldPassword";
+        User user = new User();
+        user.setEmail(email);
+
+        ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO(oldPassword, "newPass",
+                "newPass");
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> authenticationService.changePassword(requestDTO, email));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenOldPasswordIsIncorrect() throws MessagingException {
+        String email = "user@gmail.com";
+        String oldPassword = "oldPassword";
+        String encodedPassword = "encodedPassword";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(encodedPassword);
+
+        ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO(oldPassword, "newPass",
+                "newPass");
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(oldPassword, encodedPassword)).thenReturn(false);
+        when(userRepository.save(user)).thenReturn(user);
+        doNothing().when(emailService).sendChangedPasswordEmail(user);
+
+        assertThrows(APIException.class, () -> authenticationService.changePassword(requestDTO, email));
     }
 
 }
