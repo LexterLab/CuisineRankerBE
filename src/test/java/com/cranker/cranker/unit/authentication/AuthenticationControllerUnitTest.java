@@ -4,34 +4,42 @@ import com.cranker.cranker.authentication.AuthenticationController;
 import com.cranker.cranker.authentication.AuthenticationService;
 import com.cranker.cranker.authentication.jwt.JWTAuthenticationResponse;
 import com.cranker.cranker.authentication.jwt.JwtRefreshRequestDTO;
-import com.cranker.cranker.authentication.payload.ForgotPasswordRequestDTO;
-import com.cranker.cranker.authentication.payload.LoginRequestDTO;
-import com.cranker.cranker.authentication.payload.ResetPasswordRequestDTO;
-import com.cranker.cranker.authentication.payload.SignUpRequestDTO;
+import com.cranker.cranker.authentication.payload.*;
 import com.cranker.cranker.exception.ResourceNotFoundException;
+import com.cranker.cranker.user.User;
 import com.cranker.cranker.utils.Messages;
 import jakarta.mail.MessagingException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthenticationControllerUnitTest {
     @Mock
     private AuthenticationService authenticationService;
+    @Mock
+    private PasswordEncoder passwordEncoder;
     @InjectMocks
     private AuthenticationController authenticationController;
 
+    private Authentication authentication;
 
+    @BeforeEach
+    void setUp() {
+        authentication = mock(Authentication.class);
+    }
     @Test
     void shouldRespondWithTokensAndOKStatus() {
         LoginRequestDTO requestDTO = new LoginRequestDTO("valid@email.com", "password");
@@ -125,6 +133,21 @@ public class AuthenticationControllerUnitTest {
         when(authenticationService.refreshToken(requestDTO)).thenThrow(ResourceNotFoundException.class);
 
         assertThrows(ResourceNotFoundException.class, () -> authenticationController.refreshToken(requestDTO));
+    }
+
+    @Test
+    void shouldRespondWithNoContentWhenProvidedValidPasswordsAndAuthenticationWhenChangingPassword() throws MessagingException {
+        String email = "user@gmail.com";
+
+        ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO("oldPassword", "newPass",
+                "newPass");
+
+        when(authentication.getName()).thenReturn(email);
+        doNothing().when(authenticationService).changePassword(requestDTO, email);
+
+        ResponseEntity<Void> response = authenticationController.changePassword(requestDTO, authentication);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
 }

@@ -4,10 +4,7 @@ import com.cranker.cranker.authentication.jwt.JWTAuthenticationResponse;
 import com.cranker.cranker.authentication.jwt.JwtRefreshRequestDTO;
 import com.cranker.cranker.authentication.jwt.JwtTokenProvider;
 import com.cranker.cranker.authentication.jwt.JwtType;
-import com.cranker.cranker.authentication.payload.ForgotPasswordRequestDTO;
-import com.cranker.cranker.authentication.payload.LoginRequestDTO;
-import com.cranker.cranker.authentication.payload.ResetPasswordRequestDTO;
-import com.cranker.cranker.authentication.payload.SignUpRequestDTO;
+import com.cranker.cranker.authentication.payload.*;
 import com.cranker.cranker.email.EmailService;
 import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
@@ -91,6 +88,21 @@ public class AuthenticationService {
 
         String resetURL = properties.getResetURL() + resetPasswordTokenService.generateToken(user);
         emailService.sendResetPasswordEmail(user, resetURL);
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequestDTO requestDTO, String email) throws MessagingException {
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email",email));
+
+        if(!encoder.matches(requestDTO.oldPassword(), user.getPassword())) {
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.OLD_PASSWORD_WRONG);
+        }
+
+        user.setPassword(encoder.encode(requestDTO.newPassword()));
+        userRepository.save(user);
+
+        emailService.sendChangedPasswordEmail(user);
     }
 
     @Transactional

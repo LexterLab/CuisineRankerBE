@@ -25,4 +25,10 @@ public class EmailService {
     public void sendResetPasswordEmail(User user, String link) throws MessagingException {
         sender.sendResetPasswordEmail(user, link);
     }
+
+    @Async
+    @Transactional
+    public void sendChangedPasswordEmail(User user) throws MessagingException {
+        sender.sendChangedPasswordEmail(user);
+    }
 }
