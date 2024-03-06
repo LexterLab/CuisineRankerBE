@@ -11,8 +11,7 @@ import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.role.Role;
 import com.cranker.cranker.token.Token;
-import com.cranker.cranker.token.impl.EmailConfirmationTokenService;
-import com.cranker.cranker.token.impl.ResetPasswordTokenService;
+import com.cranker.cranker.token.TokenService;
 import com.cranker.cranker.user.User;
 import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.utils.Messages;
@@ -60,17 +59,15 @@ public class AuthenticationServiceUnitTest {
     @Mock
     private EmailService emailService;
     @Mock
-    private ResetPasswordTokenService resetPasswordTokenService;
-    @Mock
-    private EmailConfirmationTokenService emailConfirmationTokenService;
+    private TokenService tokenService;
+
     @InjectMocks
     private AuthenticationService authenticationService;
 
 
     @AfterEach
     void tearDown() {
-        reset(userRepository, passwordEncoder, emailService,
-                emailConfirmationTokenService, resetPasswordTokenService,passwordEncoder,
+        reset(userRepository, passwordEncoder, emailService, tokenService,passwordEncoder,
                 authenticationHelper, properties);
     }
     @Test
@@ -113,7 +110,7 @@ public class AuthenticationServiceUnitTest {
     void shouldReturnSuccessFullMessageWhenProvidedValidSignUpCredentials() throws MessagingException {
         SignUpRequestDTO requestDTO = new SignUpRequestDTO
                 (
-                "FirstName", "LastName", "password", "password"
+                        "FirstName", "LastName", "password", "password"
                         , "email@example.com"
                 );
 
@@ -161,10 +158,9 @@ public class AuthenticationServiceUnitTest {
         token.setUserId(user.getId());
 
 
-        when(resetPasswordTokenService.getUserByToken(tokenValue)).thenReturn(user);
-        doNothing().when(resetPasswordTokenService).confirmToken(tokenValue);
-        when(passwordEncoder.encode(newPassword)).thenReturn(newPassword); // Mock password encoding
-
+        when(tokenService.getUserByToken(tokenValue)).thenReturn(user);
+        doNothing().when(tokenService).confirmToken(tokenValue);
+        when(passwordEncoder.encode(newPassword)).thenReturn(newPassword);
 
 
         authenticationService.resetPassword(tokenValue, new ResetPasswordRequestDTO(newPassword, newPassword));
@@ -172,6 +168,14 @@ public class AuthenticationServiceUnitTest {
 
         verify(userRepository).save(user);
         assertThat(user.getPassword()).isEqualTo(newPassword);
+    }
+
+    @Test
+    void shouldConfirmEmail() {
+        String value = "verification token";
+        authenticationService.confirmEmail(value);
+
+        verify((tokenService)).confirmToken(value);
     }
 
     @Test
@@ -232,5 +236,29 @@ public class AuthenticationServiceUnitTest {
 
         assertThrows(APIException.class, () -> authenticationService.changePassword(requestDTO, email));
     }
+
+    @Test
+    void shouldThrowAPIExceptionWhenProvidedSamePasswordAsOldOne() throws MessagingException {
+        String email = "user@gmail.com";
+        String oldPassword = "newPass";
+        String encodedPassword = "encodedPassword";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(encodedPassword);
+
+
+        ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO(oldPassword, "newPass",
+                "newPass");
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(oldPassword, encodedPassword)).thenReturn(true);
+        when(userRepository.save(user)).thenReturn(user);
+        doNothing().when(emailService).sendChangedPasswordEmail(user);
+
+
+        assertThrows(APIException.class, () -> authenticationService.changePassword(requestDTO, email));
+    }
+
+
 
 }

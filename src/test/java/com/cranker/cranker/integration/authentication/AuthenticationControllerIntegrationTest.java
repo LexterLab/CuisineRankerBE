@@ -158,6 +158,19 @@ public class AuthenticationControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithBadRequestWhenProvidedSamePasswordAsOldOne() throws Exception  {
+        ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO("!user123",
+                "!user123", "!user123");
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/change-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(requestDTO)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @WithMockUser(username = "user@gmail2.com", roles = "USER")
     void shouldRespondWithNotFoundWhenProvidedInvalidAuthenticationUser() throws Exception {
         ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO("!user123",
