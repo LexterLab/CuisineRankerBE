@@ -99,6 +99,10 @@ public class AuthenticationService {
             throw new APIException(HttpStatus.BAD_REQUEST, Messages.OLD_PASSWORD_WRONG);
         }
 
+        if(requestDTO.oldPassword().equals(requestDTO.newPassword())) {
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.PASSWORD_NOT_CHANGED);
+        }
+
         user.setPassword(encoder.encode(requestDTO.newPassword()));
         userRepository.save(user);
 

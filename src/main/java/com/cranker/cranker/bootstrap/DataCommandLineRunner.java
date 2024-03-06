@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-@Profile("dev")
+@Profile("docker")
 public class DataCommandLineRunner implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
