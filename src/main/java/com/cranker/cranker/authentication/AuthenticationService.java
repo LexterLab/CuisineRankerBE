@@ -14,7 +14,9 @@ import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.utils.Messages;
 import com.cranker.cranker.utils.Properties;
 import jakarta.mail.MessagingException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
@@ -37,10 +39,12 @@ public class AuthenticationService {
     private final EmailService emailService;
     private final Properties properties;
     private final PasswordEncoder encoder;
+    Logger logger = LogManager.getLogger(this);
 
     public JWTAuthenticationResponse login(LoginRequestDTO loginRequestDTO) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password()));
+        logger.info(authentication.getName() + " signed in");
         SecurityContextHolder.getContext().setAuthentication(authentication);
         JWTAuthenticationResponse authenticationResponse = new JWTAuthenticationResponse();
         authenticationResponse.setAccessToken(tokenProvider.generateToken(authentication.getName(), JwtType.ACCESS));
@@ -55,14 +59,17 @@ public class AuthenticationService {
     @Transactional
     public String signUp(SignUpRequestDTO requestDTO) throws MessagingException {
         if (userRepository.existsByEmailIgnoreCase(requestDTO.email())) {
+            logger.error(Messages.EMAIL_EXISTS + " " + requestDTO.email());
             throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_EXISTS);
         }
 
         User user = helper.buildUser(requestDTO);
         userRepository.save(user);
+        logger.info(Messages.USER_SUCCESSFULLY_REGISTERED + " " + user.getEmail());
         String code = emailConfirmationTokenService.generateToken(user);
         String confirmationURL = properties.getEmailURL() + code;
         emailService.sendConfirmationEmail(user, confirmationURL, code);
+        logger.info("Email successfully sent to: " + user.getEmail());
         return Messages.USER_SUCCESSFULLY_REGISTERED;
     }
 
