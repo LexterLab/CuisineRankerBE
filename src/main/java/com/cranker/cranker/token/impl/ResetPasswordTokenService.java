@@ -5,7 +5,9 @@ import com.cranker.cranker.token.*;
 import com.cranker.cranker.user.User;
 import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.utils.AppConstants;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +15,12 @@ import java.util.UUID;
 
 @Service
 @Qualifier("resetPasswordTokenService")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ResetPasswordTokenService implements TokenService {
     private final TokenRepository tokenRepository;
     private final TokenHelper helper;
     private final UserRepository userRepository;
+    private final Logger logger = LogManager.getLogger(this);
 
     @Override
     public String generateToken(User user) {
@@ -28,6 +31,7 @@ public class ResetPasswordTokenService implements TokenService {
         token.setUserId(user.getId());
         token.setType(TokenType.RESET_PASSWORD.getName());
         tokenRepository.save(token);
+        logger.info("Reset Password token created: {}", token.getValue());
         return value;
     }
 
@@ -36,12 +40,12 @@ public class ResetPasswordTokenService implements TokenService {
         Token token = tokenRepository.findById(value)
                 .orElseThrow(() -> new ResourceNotFoundException("Token", "value", value));
         helper.generalConfirm(token, TokenType.RESET_PASSWORD);
+        logger.info("Reset Password token confirmed: {}", token.getValue());
     }
 
     public User getUserByToken(String value) {
         Token token = tokenRepository.findById(value)
                 .orElseThrow(() -> new ResourceNotFoundException("Token", "value", value));
-
        return userRepository.findById(token.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "Id", token.getUserId()));
     }
