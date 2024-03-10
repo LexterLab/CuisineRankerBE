@@ -1,6 +1,5 @@
 package com.cranker.cranker.unit.recipe;
 
-import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.recipe.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,9 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class RecipeControllerUnitTest {
@@ -81,6 +80,19 @@ public class RecipeControllerUnitTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedEmptyList, response.getBody());
         assertTrue(Objects.requireNonNull(response.getBody()).isEmpty());
+    }
+
+    @Test
+    void shouldRespondWithNoContentWhenDeletingPersonalRecipe() {
+        String userEmail = "user@example.com";
+        Long recipeId = 1L;
+
+        when(authentication.getName()).thenReturn(userEmail);
+        doNothing().when(recipeService).deletePersonalRecipe(userEmail, recipeId);
+
+        ResponseEntity<Void> response = recipeController.deleteUserPersonalRecipe(recipeId, authentication);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
 }
