@@ -8,6 +8,8 @@ import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.utils.AppConstants;
 import com.cranker.cranker.utils.Messages;
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class EmailConfirmationTokenService implements TokenService {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
     private final TokenHelper helper;
+    private final Logger logger = LogManager.getLogger(this);
 
 
     @Override
@@ -31,13 +34,15 @@ public class EmailConfirmationTokenService implements TokenService {
                 .orElseThrow(() -> new ResourceNotFoundException("Token", "value", value));
 
         helper.generalConfirm(token, TokenType.EMAIL_CONFIRMATION);
-
+        logger.info("Email confirmation token confirmed: {}", token.getValue());
         User user = userRepository.findById(token.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "Id", token.getUserId()));
 
         if (!user.getIsVerified()) {
             userRepository.confirmEmail(user.getEmail());
+            logger.info("User Email Confirmed: {}", user.getEmail());
         } else {
+            logger.error("User is already verified: {}", user.getEmail());
             throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_ALREADY_CONFIRMED);
         }
     }
@@ -52,6 +57,7 @@ public class EmailConfirmationTokenService implements TokenService {
         token.setUserId(user.getId());
         token.setType(TokenType.EMAIL_CONFIRMATION.getName());
         tokenRepository.save(token);
+        logger.info("Email confirmation token created: {}", token.getValue());
         return value;
     }
 }
