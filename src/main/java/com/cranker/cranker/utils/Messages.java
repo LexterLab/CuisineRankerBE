@@ -14,4 +14,6 @@ public interface Messages {
     String TOKEN_ALREADY_CONFIRMED = "Token was already confirmed";
     String EMAIL_ALREADY_CONFIRMED = "Email was already confirmed";
     String WRONG_TOKEN_TYPE = "Provided token is not for this type of operation";
+    String OLD_PASSWORD_WRONG = "Provided current password is incorrect";
+    String PASSWORD_NOT_CHANGED = "Please provide a new password";
 }
