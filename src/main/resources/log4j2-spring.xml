@@ -13,6 +13,9 @@
         <File name="UserFile" fileName="${logPath}user.log">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </File>
+        <File name="TokenFile" fileName="${logPath}token.log">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
     </Appenders>
 
     <Loggers>
@@ -25,6 +28,12 @@
         </Logger>
         <Logger name="com.cranker.cranker.user" level="INFO" additivity="false">
             <AppenderRef ref="UserFile"/>
+        </Logger>
+        <Logger name="com.cranker.cranker.recipe" level="INFO" additivity="false">
+            <AppenderRef ref="UserFile"/>
+        </Logger>
+        <Logger name="com.cranker.cranker.token" level="INFO" additivity="false">
+            <AppenderRef ref="TokenFile"/>
         </Logger>
     </Loggers>
 </Configuration>
