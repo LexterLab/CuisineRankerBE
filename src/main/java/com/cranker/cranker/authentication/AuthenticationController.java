@@ -11,8 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
-    Logger logger = LogManager.getLogger(AuthenticationController.class);
 
     @Operation(
             summary = "Login User REST API",
@@ -51,7 +48,6 @@ public class AuthenticationController {
     @PostMapping("signout")
     public ResponseEntity<Void> logout() {
         authenticationService.logout();
-        logger.info("User logged out");
         return ResponseEntity.noContent().build();
     }
 
