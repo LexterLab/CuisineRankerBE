@@ -39,12 +39,12 @@ public class AuthenticationService {
     private final EmailService emailService;
     private final Properties properties;
     private final PasswordEncoder encoder;
-    Logger logger = LogManager.getLogger(this);
+    private final Logger logger = LogManager.getLogger(this);
 
     public JWTAuthenticationResponse login(LoginRequestDTO loginRequestDTO) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password()));
-        logger.info(authentication.getName() + " signed in");
+        logger.info("{} authenticated successfully", loginRequestDTO.email());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         JWTAuthenticationResponse authenticationResponse = new JWTAuthenticationResponse();
         authenticationResponse.setAccessToken(tokenProvider.generateToken(authentication.getName(), JwtType.ACCESS));
@@ -59,17 +59,17 @@ public class AuthenticationService {
     @Transactional
     public String signUp(SignUpRequestDTO requestDTO) throws MessagingException {
         if (userRepository.existsByEmailIgnoreCase(requestDTO.email())) {
-            logger.error(Messages.EMAIL_EXISTS + " " + requestDTO.email());
+            logger.error(Messages.EMAIL_EXISTS + ": {}", requestDTO.email());
             throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_EXISTS);
         }
 
         User user = helper.buildUser(requestDTO);
         userRepository.save(user);
-        logger.info(Messages.USER_SUCCESSFULLY_REGISTERED + " " + user.getEmail());
+        logger.info(Messages.USER_SUCCESSFULLY_REGISTERED + ": {}", user.getEmail());
         String code = emailConfirmationTokenService.generateToken(user);
         String confirmationURL = properties.getEmailURL() + code;
         emailService.sendConfirmationEmail(user, confirmationURL, code);
-        logger.info("Email successfully sent to: " + user.getEmail());
+        logger.info("Account confirmation email successfully sent to: {}", user.getEmail());
         return Messages.USER_SUCCESSFULLY_REGISTERED;
     }
 
@@ -83,9 +83,10 @@ public class AuthenticationService {
         User user = resetPasswordTokenService.getUserByToken(value);
 
         resetPasswordTokenService.confirmToken(value);
-
+        logger.info("Reset Password Token Confirmed: {}", value);
         user.setPassword(encoder.encode(requestDTO.newPassword()));
         userRepository.save(user);
+        logger.info("Password reset successfully for user: {}", user.getEmail());
     }
 
     @Transactional
@@ -95,6 +96,7 @@ public class AuthenticationService {
 
         String resetURL = properties.getResetURL() + resetPasswordTokenService.generateToken(user);
         emailService.sendResetPasswordEmail(user, resetURL);
+        logger.info("Reset Password email successfully sent to: {}", user.getEmail());
     }
 
     @Transactional
@@ -103,17 +105,20 @@ public class AuthenticationService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "Email",email));
 
         if(!encoder.matches(requestDTO.oldPassword(), user.getPassword())) {
+            logger.error("User {} provided incorrect old password", user.getEmail());
             throw new APIException(HttpStatus.BAD_REQUEST, Messages.OLD_PASSWORD_WRONG);
         }
 
         if(requestDTO.oldPassword().equals(requestDTO.newPassword())) {
+            logger.error("User {} provided identical new password", user.getEmail());
             throw new APIException(HttpStatus.BAD_REQUEST, Messages.PASSWORD_NOT_CHANGED);
         }
 
         user.setPassword(encoder.encode(requestDTO.newPassword()));
         userRepository.save(user);
-
+        logger.info("Password successfully changed for {}", user.getEmail());
         emailService.sendChangedPasswordEmail(user);
+        logger.info("Changed Password email confirmation successfully sent to: {}", user.getEmail());
     }
 
     @Transactional
@@ -125,6 +130,7 @@ public class AuthenticationService {
         JWTAuthenticationResponse response = new JWTAuthenticationResponse();
         response.setRefreshToken(requestDTO.refreshToken());
         response.setAccessToken(tokenProvider.generateToken(user.getEmail(), JwtType.ACCESS));
+        logger.info("Refreshed access token for User: {}", user.getEmail());
         return response;
     }
 }
