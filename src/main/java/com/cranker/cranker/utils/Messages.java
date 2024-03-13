@@ -16,4 +16,6 @@ public interface Messages {
     String WRONG_TOKEN_TYPE = "Provided token is not for this type of operation";
     String OLD_PASSWORD_WRONG = "Provided current password is incorrect";
     String PASSWORD_NOT_CHANGED = "Please provide a new password";
+    String OLD_EMAIL_WRONG = "Provided old email is incorrect";
+    String EMAIL_NOT_CHANGED = "Please provide a new email";
 }
