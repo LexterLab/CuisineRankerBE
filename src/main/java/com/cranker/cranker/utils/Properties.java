@@ -13,4 +13,6 @@ public class Properties {
     private String emailURL;
     @Value("${reset.url}")
     private String resetURL;
+    @Value("${change.email.url}")
+    private String changeEmailURL;
 }
