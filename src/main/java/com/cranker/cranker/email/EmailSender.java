@@ -56,4 +56,26 @@ public class EmailSender {
         helper.setSubject("Your password has been changed");
         sender.send(message);
     }
+
+    public void sendChangeEmailRequestEmail(User user, String link, String recipient) throws MessagingException {
+        Context context = new Context(Locale.ENGLISH, Map.of("firstName", user.getFirstName(), "link", link));
+        MimeMessage message = sender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+        helper.setFrom(properties.getEmailSender());
+        helper.setText(engine.process("change-email", context), true);
+        helper.setTo(recipient);
+        helper.setSubject("Request to change Email");
+        sender.send(message);
+    }
+
+    public void sendChangedEmailEmail(String recipient, String recipientName) throws MessagingException {
+        Context context = new Context(Locale.ENGLISH, Map.of("firstName", recipientName));
+        MimeMessage message = sender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+        helper.setFrom(properties.getEmailSender());
+        helper.setText(engine.process("changed-email", context), true);
+        helper.setTo(recipient);
+        helper.setSubject("Your Email has been changed");
+        sender.send(message);
+    }
 }
