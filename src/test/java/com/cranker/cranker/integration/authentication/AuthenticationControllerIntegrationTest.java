@@ -4,10 +4,7 @@ import com.cranker.cranker.authentication.AuthenticationController;
 import com.cranker.cranker.authentication.AuthenticationService;
 import com.cranker.cranker.authentication.jwt.JWTAuthenticationResponse;
 import com.cranker.cranker.authentication.jwt.JwtRefreshRequestDTO;
-import com.cranker.cranker.authentication.payload.ChangePasswordRequestDTO;
-import com.cranker.cranker.authentication.payload.ForgotPasswordRequestDTO;
-import com.cranker.cranker.authentication.payload.LoginRequestDTO;
-import com.cranker.cranker.authentication.payload.SignUpRequestDTO;
+import com.cranker.cranker.authentication.payload.*;
 import com.cranker.cranker.email.EmailService;
 import com.cranker.cranker.user.User;
 import com.cranker.cranker.utils.Messages;
@@ -30,8 +27,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -189,6 +185,50 @@ public class AuthenticationControllerIntegrationTest {
                 "newPassword", "newPassword");
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/change-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(requestDTO)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithNoContentWhenRequestingChangeEmail() throws Exception {
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user@gmail.com", "new@gmail.com");
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/change-email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(requestDTO)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithBadRequestWhenRequestingChangeEmailWithWrongOldEmail() throws Exception {
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user2@gmail.com", "new@gmail.com");
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/change-email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(requestDTO)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithBadRequestWhenRequestingChangeEmailWithIdenticalEmails() throws Exception {
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user@gmail.com", "user@gmail.com");
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/change-email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(requestDTO)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenUserNotProvidedWhenRequestingChangeEmail() throws Exception {
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user@gmail.com", "user@gmail.com");
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/change-email")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(requestDTO)))
