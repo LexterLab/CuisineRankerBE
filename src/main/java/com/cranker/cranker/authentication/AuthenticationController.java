@@ -159,7 +159,7 @@ public class AuthenticationController {
             name = "Bearer Authentication"
     )
     @PreAuthorize("hasRole('USER')")
-    @PatchMapping("change-email")
+    @PostMapping("change-email")
     public ResponseEntity<Void> requestChangeEmail(@Valid @RequestBody ChangeEmailRequestDTO requestDTO,
                                                     Authentication authentication) throws MessagingException {
         authenticationService.requestChangeUserEmail(requestDTO, authentication.getName());

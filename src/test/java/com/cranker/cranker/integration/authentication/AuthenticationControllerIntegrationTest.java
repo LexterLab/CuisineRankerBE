@@ -188,7 +188,7 @@ public class AuthenticationControllerIntegrationTest {
     void shouldRespondWithNoContentWhenRequestingChangeEmail() throws Exception {
         ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user@gmail.com", "new@gmail.com");
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/change-email")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/change-email")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(requestDTO)))
@@ -199,7 +199,7 @@ public class AuthenticationControllerIntegrationTest {
     @WithMockUser(username = "user@gmail.com", roles = "USER")
     void shouldRespondWithBadRequestWhenRequestingChangeEmailWithWrongOldEmail() throws Exception {
         ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user2@gmail.com", "new@gmail.com");
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/change-email")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/change-email")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(requestDTO)))
@@ -210,7 +210,7 @@ public class AuthenticationControllerIntegrationTest {
     @WithMockUser(username = "user@gmail.com", roles = "USER")
     void shouldRespondWithBadRequestWhenRequestingChangeEmailWithIdenticalEmails() throws Exception {
         ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user@gmail.com", "user@gmail.com");
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/change-email")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/change-email")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(requestDTO)))
@@ -220,7 +220,7 @@ public class AuthenticationControllerIntegrationTest {
     @Test
     void shouldRespondWithForbiddenWhenUserNotProvidedWhenRequestingChangeEmail() throws Exception {
         ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user@gmail.com", "user@gmail.com");
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/change-email")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/change-email")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(requestDTO)))
