@@ -336,7 +336,7 @@ public class AuthenticationServiceUnitTest {
         doNothing().when(tokenService).confirmToken(any(String.class));
         when(tokenProvider.getUsername(token)).thenReturn(newEmail);
         when(userRepository.save(user)).thenReturn(modifiedUser);
-        doNothing().when(emailService).sendChangedEmailEmail(any(String.class), any(String.class));
+        doNothing().when(emailService).sendChangedEmailEmail(any(String[].class), any(String.class));
 
         authenticationService.changeUserEmail(email, token);
 

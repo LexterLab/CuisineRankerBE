@@ -26,6 +26,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -173,9 +175,8 @@ public class AuthenticationService {
        userRepository.save(user);
        logger.info("Successfully changed email for user: {}", email);
 
-       emailService.sendChangedEmailEmail(user.getEmail(), user.getFirstName());
+       emailService.sendChangedEmailEmail(List.of(user.getEmail(), email).toArray(new String[0]), user.getFirstName());
        logger.info("Successfully sent email to notify email changing to new address: {}", newEmail);
-       emailService.sendChangedEmailEmail(email, user.getFirstName());
        logger.info("Successfully sent email to notify email changing to old address: {}", email);
    }
 }

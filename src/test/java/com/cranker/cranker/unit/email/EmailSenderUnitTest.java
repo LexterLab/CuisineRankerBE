@@ -165,8 +165,8 @@ public class EmailSenderUnitTest {
         MimeMessage mimeMessage = new MimeMessage((Session) null);
         when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
 
-
-        emailSender.sendChangedEmailEmail("recipient@gmail.com", "recipientName");
+        String[] recipients =  {"recipient@gmail.com", "recipient2@gmail.com"};
+        emailSender.sendChangedEmailEmail(recipients, "recipientName");
 
 
         verify(javaMailSender).send(any(MimeMessage.class));

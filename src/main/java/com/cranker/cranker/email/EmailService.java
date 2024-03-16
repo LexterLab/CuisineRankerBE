@@ -39,7 +39,7 @@ public class EmailService {
 
     @Async
     @Transactional
-    public void sendChangedEmailEmail(String recipient, String recipientName) throws MessagingException {
-        sender.sendChangedEmailEmail(recipient, recipientName);
+    public void sendChangedEmailEmail(String[] recipients, String recipientName) throws MessagingException {
+        sender.sendChangedEmailEmail(recipients, recipientName);
     }
 }
