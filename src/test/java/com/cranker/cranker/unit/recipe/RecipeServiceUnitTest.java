@@ -36,13 +36,15 @@ public class RecipeServiceUnitTest {
         recipe.setPreparation("preparation");
         recipe.setType(RecipeType.CUSTOM);
         recipe.setPictureURL(pictureURL);
+        recipe.setPrepTimeInMinutes(1);
+        recipe.setCookTimeInMinutes(1);
 
 
         RecipeDTO expectedRecipe = new RecipeDTO
                 (
                         recipe.getId(), recipe.getName(), recipe.getPictureURL(), recipe.getPreparation(),
                         recipe.getType(), recipe.getPrepTimeInMinutes(), recipe.getCookTimeInMinutes(),
-                        recipe.getTotalTimeInMinutes(), recipe.getCreatedAt(), recipe.getUpdatedAt()
+                        2, recipe.getCreatedAt(), recipe.getUpdatedAt()
                 );
 
         String userEmail = "user@example.com";

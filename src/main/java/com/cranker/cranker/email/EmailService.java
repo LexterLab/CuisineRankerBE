@@ -31,4 +31,15 @@ public class EmailService {
     public void sendChangedPasswordEmail(User user) throws MessagingException {
         sender.sendChangedPasswordEmail(user);
     }
+
+    @Async
+    public void sendChangeEmailRequestEmail(User user, String link, String recipient) throws MessagingException {
+        sender.sendChangeEmailRequestEmail(user, link, recipient);
+    }
+
+    @Async
+    @Transactional
+    public void sendChangedEmailEmail(String[] recipients, String recipientName) throws MessagingException {
+        sender.sendChangedEmailEmail(recipients, recipientName);
+    }
 }

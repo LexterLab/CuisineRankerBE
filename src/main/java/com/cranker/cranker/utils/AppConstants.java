@@ -7,7 +7,8 @@ import lombok.Getter;
 @Getter
 public enum AppConstants {
     EMAIL_TOKEN_SPAN("Email Token Span", 900L),
-    RESET_TOKEN_SPAN("Reset Token Span", 500L);
+    RESET_TOKEN_SPAN("Reset Token Span", 500L),
+    CHANGE_EMAIL_TOKEN_SPAN("Change Email Token Span", 500L);
 
 
     private final String name;

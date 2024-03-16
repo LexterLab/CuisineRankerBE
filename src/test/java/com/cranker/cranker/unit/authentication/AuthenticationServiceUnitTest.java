@@ -33,8 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -259,6 +258,90 @@ public class AuthenticationServiceUnitTest {
         assertThrows(APIException.class, () -> authenticationService.changePassword(requestDTO, email));
     }
 
+    @Test
+    void shouldRequestChangeUserEmail() throws MessagingException {
+        String email = "user@gmail.com";
+        String newEmail = "user2@gmail.com";
+        String emailUrl = "url";
+        String token = "token";
+        User user = new User();
+        user.setEmail(email);
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO(email, newEmail);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(properties.getChangeEmailURL()).thenReturn(emailUrl);
+        when(tokenService.generateToken(user)).thenReturn(token);
+
+        doNothing().when(emailService).sendChangeEmailRequestEmail(any(User.class), any(String.class), any(String.class));
+
+        authenticationService.requestChangeUserEmail(requestDTO, email);
+
+        verify(emailService).sendChangeEmailRequestEmail(any(User.class), any(String.class), any(String.class));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenProvidedWrongEmailWhenRequestingChangeEmail() {
+        String email = "user@gmail.com";
+        String newEmail = "user2@gmail.com";
+        String wrongEmail = "wrong@gmail.com";
+        User user = new User();
+        user.setEmail(email);
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO(wrongEmail, newEmail);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+
+        assertThrows(APIException.class, () -> authenticationService.requestChangeUserEmail(requestDTO, email));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenProvidedSameEmailWhenRequestingChangeEmail() {
+        String email = "user@gmail.com";
+        String newEmail = "user@gmail.com";
+        User user = new User();
+        user.setEmail(email);
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO(email, newEmail);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+
+        assertThrows(APIException.class, () -> authenticationService.requestChangeUserEmail(requestDTO, email));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenProvidedExistingEmailWhenRequestingChangeEmail() {
+        String email = "user@gmail.com";
+        String newEmail = "user2@gmail.com";
+        User user = new User();
+        user.setEmail(email);
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO(email, newEmail);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmailIgnoreCase(newEmail)).thenReturn(true);
+
+        assertThrows(APIException.class, () -> authenticationService.requestChangeUserEmail(requestDTO, email));
+    }
+
+    @Test
+    void shouldChangeEmail() throws MessagingException {
+        String email = "user@gmail.com";
+        String newEmail = "user2@gmail.com";
+        String token = "token";
+        User user = new User();
+        user.setFirstName("name");
+        user.setEmail(email);
+        User modifiedUser = new User();
+        modifiedUser.setEmail(newEmail);
+        modifiedUser.setFirstName("name");
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        doNothing().when(tokenService).confirmToken(any(String.class));
+        when(tokenProvider.getUsername(token)).thenReturn(newEmail);
+        when(userRepository.save(user)).thenReturn(modifiedUser);
+        doNothing().when(emailService).sendChangedEmailEmail(any(String[].class), any(String.class));
+
+        authenticationService.changeUserEmail(email, token);
+
+        assertEquals(newEmail, modifiedUser.getEmail());
+    }
 
 
 }
