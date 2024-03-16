@@ -5,8 +5,8 @@ import com.cranker.cranker.authentication.AuthenticationService;
 import com.cranker.cranker.authentication.jwt.JWTAuthenticationResponse;
 import com.cranker.cranker.authentication.jwt.JwtRefreshRequestDTO;
 import com.cranker.cranker.authentication.payload.*;
+import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
-import com.cranker.cranker.user.User;
 import com.cranker.cranker.utils.Messages;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -150,4 +149,52 @@ public class AuthenticationControllerUnitTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
+    @Test
+    void shouldRespondWithNoContentWhenRequestingChangeEmail() throws MessagingException {
+        String oldEmail = "old@gmail.com";
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO(oldEmail, "new@gmail.com");
+
+        when(authentication.getName()).thenReturn(oldEmail);
+        doNothing().when(authenticationService).requestChangeUserEmail(requestDTO, oldEmail);
+
+        ResponseEntity<Void> response = authenticationController.requestChangeEmail(requestDTO, authentication);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    void shouldRespondWithAPIExceptionWhenProvidingWrongEmailOnChangeEmailRequest() throws MessagingException {
+        String wrongEmail = "wrong@gmail.com";
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO(wrongEmail, "new@gmail.com");
+
+        when(authentication.getName()).thenReturn(wrongEmail);
+        doThrow(APIException.class).when(authenticationService).requestChangeUserEmail(requestDTO, wrongEmail);
+
+        assertThrows(APIException.class, () -> authenticationController.requestChangeEmail(requestDTO, authentication));
+    }
+
+    @Test
+    void shouldRespondWithAPIExceptionWhenProvidedSameEmailOnChangeEmailRequest() throws MessagingException {
+        String oldEmail = "old@gmail.com";
+        String newEmail = "old@gmail.com";
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO(oldEmail, newEmail);
+
+        when(authentication.getName()).thenReturn(oldEmail);
+        doThrow(APIException.class).when(authenticationService).requestChangeUserEmail(requestDTO, oldEmail);
+
+        assertThrows(APIException.class, () -> authenticationController.requestChangeEmail(requestDTO, authentication));
+    }
+
+    @Test
+    void shouldRespondWithNoContentWhenChangingUserEmail() throws MessagingException {
+        String tokenValue = "token";
+        String userEmail = "email@gmail.com";
+
+        when(authentication.getName()).thenReturn(userEmail);
+        doNothing().when(authenticationService).changeUserEmail(userEmail, tokenValue);
+
+        ResponseEntity<Void> response = authenticationController.changeUserEmail(tokenValue, authentication);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
 }
