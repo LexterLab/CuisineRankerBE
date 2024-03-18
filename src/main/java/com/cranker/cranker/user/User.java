@@ -44,6 +44,10 @@ public class User {
     @ColumnDefault(value = "false")
     private Boolean isVerified;
 
+    @Generated
+    @ColumnDefault(value = "false")
+    private Boolean isTwoFactorEnabled;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
