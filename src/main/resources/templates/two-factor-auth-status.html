@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Email Confirmation</title>
+    <title>Two Factor Authentication</title>
     <style type="text/css">
         body {
             font-family: 'Arial', sans-serif;
@@ -34,23 +34,14 @@
             background-color: #0056b3;
         }
 
-        #confirmationCode {
-            margin-top: 10px;
-            color: #28a745;
-            font-weight: bold;
-        }
-
     </style>
 </head>
 <body>
 
 <div class="container">
     <p>Dear <span th:text="${firstName}"></span>,</p>
-    <p>you can sign in to your account by entering the given below code:</p>
-</div>
-
-<div class="container show-code">
-    <p id="confirmationCode">Your Code: <span th:text="${code}"></span></p>
+    <p>two-factor authentication was <span th:text="${status}"></span> for your account!</p>
+    <p>If it was not requested by you, please contact us as soon as possible!</p>
 </div>
 
 </body>

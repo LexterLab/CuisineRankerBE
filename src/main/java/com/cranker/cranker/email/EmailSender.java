@@ -84,6 +84,17 @@ public class EmailSender {
         MimeMessage message = sender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
         helper.setFrom(properties.getEmailSender());
+        helper.setText(engine.process("two-factor-auth-status", context), true);
+        helper.setTo(user.getEmail());
+        helper.setSubject("Two-factor Authentication");
+        sender.send(message);
+    }
+
+    public void sendTwoFactorEmail(User user, String code) throws MessagingException {
+        Context context = new Context(Locale.ENGLISH, Map.of("firstName", user.getFirstName(), "code", code));
+        MimeMessage message = sender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+        helper.setFrom(properties.getEmailSender());
         helper.setText(engine.process("two-factor-auth", context), true);
         helper.setTo(user.getEmail());
         helper.setSubject("Two-factor Authentication");
