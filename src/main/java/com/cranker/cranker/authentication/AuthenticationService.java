@@ -179,4 +179,16 @@ public class AuthenticationService {
        logger.info("Successfully sent email to notify email changing to new address: {}", newEmail);
        logger.info("Successfully sent email to notify email changing to old address: {}", email);
    }
+
+   @Transactional
+   public void changeTwoFactorAuthenticationMode(String email) throws MessagingException {
+       User user = userRepository.findUserByEmailIgnoreCase(email)
+               .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+       userRepository.switchTwoFactorAuth(email, !user.getIsTwoFactorEnabled());
+       logger.info("User: {} set 2FA to: {}", email, !user.getIsTwoFactorEnabled());
+
+       emailService.sendTwoFactorStatusEmail(user);
+       logger.info("Sent successfully email to notify user of switching 2FA mode");
+   }
 }
