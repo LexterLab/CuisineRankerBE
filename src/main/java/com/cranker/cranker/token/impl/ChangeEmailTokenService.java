@@ -35,7 +35,7 @@ public class ChangeEmailTokenService implements TokenService {
         token.setCreatedAt(LocalDateTime.now().toString());
         token.setExpirySeconds(AppConstants.CHANGE_EMAIL_TOKEN_SPAN.getValue());
         tokenRepository.save(token);
-        logger.info("TEmail change token created: {}", value);
+        logger.info("Email change token created: {}", value);
         return value;
     }
 
