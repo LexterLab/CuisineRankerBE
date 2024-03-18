@@ -8,5 +8,6 @@ public record UserDTO(
         String name,
         @Schema(example = "jordan@gmail.com")
         String email,
-        Boolean isVerified
+        Boolean isVerified,
+        Boolean isTwoFactorEnabled
 ){}

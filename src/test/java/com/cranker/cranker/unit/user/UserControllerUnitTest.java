@@ -47,7 +47,7 @@ class UserControllerUnitTest {
 
     @Test
     public void shouldReturnUserInfoWhenGivenValidUsernameOrEmail() {
-        UserDTO expectedUser = new UserDTO(1L,"Michael Myers", "michael@example.com", true);
+        UserDTO expectedUser = new UserDTO(1L,"Michael Myers", "michael@example.com", true, true);
 
         when(authentication.getName()).thenReturn("michael@example.com");
         when(userService.retrieveUserInfo("michael@example.com")).thenReturn(expectedUser);
