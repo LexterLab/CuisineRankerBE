@@ -81,7 +81,7 @@ public class AuthenticationServiceUnitTest {
 
 
     @Test
-    void shouldReturnAccessTokenAndRefreshTokenWhenSignedIn() {
+    void shouldReturnAccessTokenAndRefreshTokenWhenSignedIn() throws MessagingException {
         Authentication authentication = mock(Authentication.class);
         LoginRequestDTO loginRequestDTO = new LoginRequestDTO("valid@example.com", "password");
 

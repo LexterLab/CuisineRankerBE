@@ -40,10 +40,10 @@ public class AuthenticationControllerUnitTest {
         authentication = mock(Authentication.class);
     }
     @Test
-    void shouldRespondWithTokensAndOKStatus() {
+    void shouldRespondWithTokensAndOKStatus() throws MessagingException {
         LoginRequestDTO requestDTO = new LoginRequestDTO("valid@email.com", "password");
         JWTAuthenticationResponse authenticationResponse = new JWTAuthenticationResponse
-                ("access_token", "bearer", "refresh_token");
+                ("access_token", "bearer", "refresh_token", false);
 
         when(authenticationService.login(requestDTO)).thenReturn(authenticationResponse);
 
@@ -115,7 +115,7 @@ public class AuthenticationControllerUnitTest {
     void shouldRespondWithRefreshTokenAndCreatedStatusWhenRefreshingTokens() {
         JwtRefreshRequestDTO requestDTO = new JwtRefreshRequestDTO("refresh_token");
         JWTAuthenticationResponse authenticationResponse = new JWTAuthenticationResponse
-                ("access_token", "bearer", "refresh_token");
+                ("access_token", "bearer", "refresh_token", false);
 
         when(authenticationService.refreshToken(requestDTO)).thenReturn(authenticationResponse);
 

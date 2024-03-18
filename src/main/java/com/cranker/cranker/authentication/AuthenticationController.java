@@ -33,7 +33,7 @@ public class AuthenticationController {
             @ApiResponse( responseCode = "400", description = "Http Status 400 BAD REQUEST")
 })
     @PostMapping("signin")
-    public ResponseEntity<JWTAuthenticationResponse> login(@Valid @RequestBody LoginRequestDTO loginDTO) {
+    public ResponseEntity<JWTAuthenticationResponse> login(@Valid @RequestBody LoginRequestDTO loginDTO) throws MessagingException {
         return ResponseEntity.ok(authenticationService.login(loginDTO));
     }
 
