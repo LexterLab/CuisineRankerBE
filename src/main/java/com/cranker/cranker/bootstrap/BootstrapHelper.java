@@ -42,6 +42,7 @@ public class BootstrapHelper {
         user.setPassword(new BCryptPasswordEncoder().encode("!user123"));
         user.setCreatedAt(LocalDateTime.now());
         user.setIsVerified(true);
+        user.setIsTwoFactorEnabled(false);
         user.setRoles(Set.of(userRole));
 
 
