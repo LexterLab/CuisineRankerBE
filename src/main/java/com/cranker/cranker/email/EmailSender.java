@@ -78,4 +78,15 @@ public class EmailSender {
         helper.setSubject("Your Email has been changed");
         sender.send(message);
     }
+    public void sendTwoFactorStatusEmail(User user) throws MessagingException {
+        Context context = new Context(Locale.ENGLISH, Map.of("firstName", user.getFirstName(),
+                "status", !user.getIsTwoFactorEnabled() ? "enabled": "disabled"));
+        MimeMessage message = sender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+        helper.setFrom(properties.getEmailSender());
+        helper.setText(engine.process("two-factor-auth", context), true);
+        helper.setTo(user.getEmail());
+        helper.setSubject("Two-factor Authentication");
+        sender.send(message);
+    }
 }
