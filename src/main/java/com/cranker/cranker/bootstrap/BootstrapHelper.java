@@ -48,6 +48,8 @@ public class BootstrapHelper {
 
         userRepository.saveAll(List.of(admin, user));
 
+        userRepository.confirmEmail(user.getEmail());
+
         Ingredient ingredient = new Ingredient();
         ingredient.setAmountType(AmountType.MG);
         ingredient.setName("Chicken Breasts Oiled");
