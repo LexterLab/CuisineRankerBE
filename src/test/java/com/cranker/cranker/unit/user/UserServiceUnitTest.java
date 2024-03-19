@@ -2,11 +2,10 @@ package com.cranker.cranker.unit.user;
 
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.user.User;
-import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.user.UserService;
+import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +16,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 
@@ -30,10 +28,7 @@ public class UserServiceUnitTest {
     @InjectMocks
     private UserService service;
 
-//    @AfterEach
-//    void tearDown() {
-//        reset(repository);
-//    }
+
 
 
     @Test

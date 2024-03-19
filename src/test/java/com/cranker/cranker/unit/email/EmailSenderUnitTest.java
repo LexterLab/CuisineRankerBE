@@ -171,4 +171,56 @@ public class EmailSenderUnitTest {
 
         verify(javaMailSender).send(any(MimeMessage.class));
     }
+
+    @Test
+    void shouldSendChanged2FAModeMail() throws MessagingException {
+        User user = new User();
+        user.setFirstName("John");
+        user.setEmail("test@example.com");
+        user.setIsTwoFactorEnabled(false);
+
+
+
+        when(properties.getEmailSender()).thenReturn("sender@example.com");
+
+
+        String emailContent = "Mock email content";
+        when(engine.process(anyString(), any(Context.class))).thenReturn(emailContent);
+
+
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+
+        emailSender.sendTwoFactorStatusEmail(user);
+
+
+        verify(javaMailSender).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void shouldSend2FAMail() throws MessagingException {
+        User user = new User();
+        user.setFirstName("John");
+        user.setEmail("test@example.com");
+        user.setIsTwoFactorEnabled(false);
+        String code = "5631";
+
+
+        when(properties.getEmailSender()).thenReturn("sender@example.com");
+
+
+        String emailContent = "Mock email content";
+        when(engine.process(anyString(), any(Context.class))).thenReturn(emailContent);
+
+
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+
+        emailSender.sendTwoFactorEmail(user, code);
+
+
+        verify(javaMailSender).send(any(MimeMessage.class));
+    }
 }

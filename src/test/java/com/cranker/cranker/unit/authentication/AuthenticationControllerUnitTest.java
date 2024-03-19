@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,8 +27,6 @@ import static org.mockito.Mockito.*;
 public class AuthenticationControllerUnitTest {
     @Mock
     private AuthenticationService authenticationService;
-    @Mock
-    private PasswordEncoder passwordEncoder;
     @InjectMocks
     private AuthenticationController authenticationController;
 
@@ -191,10 +188,33 @@ public class AuthenticationControllerUnitTest {
         String userEmail = "email@gmail.com";
 
         when(authentication.getName()).thenReturn(userEmail);
-        doNothing().when(authenticationService).changeUserEmail(userEmail, tokenValue);
 
         ResponseEntity<Void> response = authenticationController.changeUserEmail(tokenValue, authentication);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
+
+    @Test
+    void shouldRespondWithNoContentWhenChanging2FAMode() throws MessagingException {
+        String userEmail = "email@gmail.com";
+
+        when(authentication.getName()).thenReturn(userEmail);
+
+        ResponseEntity<Void> response = authenticationController.changeTwoFactorMode(authentication);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    void shouldRespondWithNoContentWhenConfirming2FAToken() {
+        TwoFactorRequestDTO requestDTO =  new TwoFactorRequestDTO("5234");
+        String userEmail = "email@gmail.com";
+
+        when(authentication.getName()).thenReturn(userEmail);
+
+        ResponseEntity<Void> response = authenticationController.confirmTwoFactorCode(requestDTO, authentication);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
 }
