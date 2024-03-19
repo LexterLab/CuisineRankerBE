@@ -4,6 +4,7 @@ import com.cranker.cranker.authentication.jwt.JwtType;
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.token.*;
 import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.utils.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -20,6 +21,7 @@ import java.util.Random;
 public class TwoFactorTokenService implements TokenService {
     private final TokenHelper helper;
     private final TokenRepository tokenRepository;
+    private final UserRepository userRepository;
     private final Logger logger = LogManager.getLogger(this);
     @Override
     public String generateToken(User user) {
@@ -43,5 +45,13 @@ public class TwoFactorTokenService implements TokenService {
 
         helper.generalConfirm(token, TokenType.TWO_FACTOR);
         logger.info("Two Factor Authentication Token confirmed: {}", token.getValue());
+    }
+
+    @Override
+    public User getUserByToken(String value) {
+        Token token = tokenRepository.findById(value)
+                .orElseThrow(() -> new ResourceNotFoundException("Token", "value", value));
+        return userRepository.findById(token.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Id", token.getUserId()));
     }
 }
