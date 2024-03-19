@@ -17,4 +17,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("UPDATE User u " +
             "SET u.isVerified = TRUE WHERE u.email = ?1")
     void confirmEmail(String email);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE User u " +
+            "SET u.isTwoFactorEnabled = ?2 WHERE u.email = ?1")
+    void switchTwoFactorAuth(String email, boolean isTwoFactorEnabled);
 }

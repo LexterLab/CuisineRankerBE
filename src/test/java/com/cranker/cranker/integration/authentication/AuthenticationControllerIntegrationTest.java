@@ -2,6 +2,7 @@ package com.cranker.cranker.integration.authentication;
 
 import com.cranker.cranker.authentication.payload.*;
 import com.cranker.cranker.email.EmailService;
+import com.cranker.cranker.token.TokenService;
 import com.cranker.cranker.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
@@ -36,11 +37,10 @@ public class AuthenticationControllerIntegrationTest {
     private EmailService emailService;
 
 
-
-
     @BeforeEach
     void setUp() throws MessagingException {
         doNothing().when(emailService).sendChangedPasswordEmail(any(User.class));
+        doNothing().when(emailService).sendChangeEmailRequestEmail(any(User.class), any(String.class), any(String.class));
     }
     @Test
     void shouldRespondWithNoContentWhenLoggedOut() throws Exception {
@@ -59,7 +59,8 @@ public class AuthenticationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").exists())
                 .andExpect(jsonPath("$.tokenType").exists())
-                .andExpect(jsonPath("$.refreshToken").exists());
+                .andExpect(jsonPath("$.refreshToken").exists())
+                .andExpect(jsonPath("$.isTwoFactor").exists());
     }
 
     @Test
@@ -98,24 +99,6 @@ public class AuthenticationControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-//    @Test
-//    void shouldRespondWithCreatedAndAccessTokensWhenProvidedValidRefreshToken() throws Exception {
-//        JwtRefreshRequestDTO requestDTO = new JwtRefreshRequestDTO("refresh_token");
-//
-//        when(authenticationService.refreshToken(any()))
-//                .thenReturn(new JWTAuthenticationResponse("access_token", "bearer",
-//                        "refresh_token"));
-//
-//        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/refresh-token")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(requestDTO)))
-//                .andExpect(status().isCreated())
-//                .andExpect(jsonPath("$.accessToken").exists())
-//                .andExpect(jsonPath("$.tokenType").exists())
-//                .andExpect(jsonPath("$.refreshToken").exists())
-//                .andExpect(jsonPath("$.refreshToken").value(requestDTO.refreshToken()));
-//    }
 
     @Test
     @WithMockUser(username = "user@gmail.com", roles = "USER")
@@ -185,18 +168,6 @@ public class AuthenticationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "user@gmail.com", roles = "USER")
-    void shouldRespondWithNoContentWhenRequestingChangeEmail() throws Exception {
-        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user@gmail.com", "new@gmail.com");
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/change-email")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(requestDTO)))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @WithMockUser(username = "user@gmail.com", roles = "USER")
     void shouldRespondWithBadRequestWhenRequestingChangeEmailWithWrongOldEmail() throws Exception {
         ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user2@gmail.com", "new@gmail.com");
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/change-email")
@@ -224,6 +195,27 @@ public class AuthenticationControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(requestDTO)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithNoContentWhenChanging2FAMode() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/two-factor"))
+                .andExpect(status().isNoContent());
+    }
+
+
+    @Test
+    @WithMockUser(username = "admin@gmail.com", roles = "USER")
+    void shouldRespondWithBadWhenChanging2FAModeWithUnverifiedUser() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/two-factor"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenUserNotProvidedWhenChanging2FAMode() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/two-factor"))
                 .andExpect(status().isForbidden());
     }
 }

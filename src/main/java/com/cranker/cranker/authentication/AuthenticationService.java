@@ -39,17 +39,31 @@ public class AuthenticationService {
     private final TokenService emailConfirmationTokenService;
     private final TokenService resetPasswordTokenService;
     private final TokenService changeEmailTokenService;
+    private final TokenService twoFactorTokenService;
     private final EmailService emailService;
     private final Properties properties;
     private final PasswordEncoder encoder;
     private final Logger logger = LogManager.getLogger(this);
 
-    public JWTAuthenticationResponse login(LoginRequestDTO loginRequestDTO) {
+    @Transactional
+    public JWTAuthenticationResponse login(LoginRequestDTO loginRequestDTO) throws MessagingException {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password()));
         logger.info("{} authenticated successfully", loginRequestDTO.email());
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
         JWTAuthenticationResponse authenticationResponse = new JWTAuthenticationResponse();
+
+        User user = userRepository.findUserByEmailIgnoreCase(loginRequestDTO.email())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", loginRequestDTO.email()));
+
+        if (user.getIsTwoFactorEnabled()) {
+            logger.info(Messages.ENABLED_2FA + ": {}", loginRequestDTO.email());
+            String token = twoFactorTokenService.generateToken(user);
+            emailService.sendTwoFactorEmail(user, token);
+            authenticationResponse.setIsTwoFactor(true);
+        }
+
         authenticationResponse.setAccessToken(tokenProvider.generateToken(authentication.getName(), JwtType.ACCESS));
         authenticationResponse.setRefreshToken(tokenProvider.generateToken(authentication.getName(), JwtType.REFRESH));
         return authenticationResponse;
@@ -179,4 +193,35 @@ public class AuthenticationService {
        logger.info("Successfully sent email to notify email changing to new address: {}", newEmail);
        logger.info("Successfully sent email to notify email changing to old address: {}", email);
    }
+
+   @Transactional
+   public void changeTwoFactorAuthenticationMode(String email) throws MessagingException {
+       User user = userRepository.findUserByEmailIgnoreCase(email)
+               .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+       if (!user.getIsVerified()) {
+           throw new APIException(HttpStatus.BAD_REQUEST, Messages.NOT_VERIFIED);
+       }
+
+       userRepository.switchTwoFactorAuth(email, !user.getIsTwoFactorEnabled());
+       logger.info("User: {} set 2FA to: {}", email, !user.getIsTwoFactorEnabled());
+
+       emailService.sendTwoFactorStatusEmail(user);
+       logger.info("Sent successfully email to notify user of switching 2FA mode");
+   }
+
+    @Transactional
+    public void confirmTwoFactorAuthentication(TwoFactorRequestDTO requestDTO, String email) {
+
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+        User tokenUser = twoFactorTokenService.getUserByToken(requestDTO.token());
+
+        if (!user.getEmail().equals(tokenUser.getEmail())) {
+            throw new APIException(HttpStatus.UNAUTHORIZED, Messages.TOKEN_DONT_MATCH_USER);
+        }
+
+        twoFactorTokenService.confirmToken(requestDTO.token());
+    }
 }

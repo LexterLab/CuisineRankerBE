@@ -1,51 +1,57 @@
 package com.cranker.cranker.token.impl;
 
-import com.cranker.cranker.authentication.jwt.JwtTokenProvider;
 import com.cranker.cranker.authentication.jwt.JwtType;
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.token.*;
 import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.utils.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-
-
+import java.util.Random;
 
 @RequiredArgsConstructor
 @Service
-@Qualifier("changeEmailTokenService")
-public class ChangeEmailTokenService implements TokenService {
+@Qualifier("twoFactorTokenService")
+public class TwoFactorTokenService implements TokenService {
     private final TokenHelper helper;
     private final TokenRepository tokenRepository;
-    private final JwtTokenProvider tokenProvider;
+    private final UserRepository userRepository;
     private final Logger logger = LogManager.getLogger(this);
     @Override
     public String generateToken(User user) {
-        String value  = tokenProvider.generateToken(user.getEmail(), JwtType.ACCESS);
+        Random random = new Random();
+        int value = random.nextInt(9000) + 1000;
         Token token = new Token();
-        token.setValue(value);
-        token.setType(TokenType.CHANGE_EMAIL.getName());
+        token.setValue(value + "");
+        token.setType(TokenType.TWO_FACTOR.getName());
         token.setUserId(user.getId());
         token.setCreatedAt(LocalDateTime.now().toString());
-        token.setExpirySeconds(AppConstants.CHANGE_EMAIL_TOKEN_SPAN.getValue());
+        token.setExpirySeconds(AppConstants.TWO_FACTOR_TOKEN_SPAN.getValue());
         tokenRepository.save(token);
         logger.info("Email change token created: {}", value);
-        return value;
+        return value + "";
     }
 
     @Override
-    @Transactional
     public void confirmToken(String value) {
         Token token = tokenRepository.findById(value)
                 .orElseThrow(() -> new ResourceNotFoundException("Token", "value", value));
 
-        helper.generalConfirm(token, TokenType.CHANGE_EMAIL);
-        logger.info("Change Email token confirmed: {}", token.getValue());
+        helper.generalConfirm(token, TokenType.TWO_FACTOR);
+        logger.info("Two Factor Authentication Token confirmed: {}", token.getValue());
+    }
+
+    @Override
+    public User getUserByToken(String value) {
+        Token token = tokenRepository.findById(value)
+                .orElseThrow(() -> new ResourceNotFoundException("Token", "value", value));
+        return userRepository.findById(token.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Id", token.getUserId()));
     }
 }

@@ -42,10 +42,13 @@ public class BootstrapHelper {
         user.setPassword(new BCryptPasswordEncoder().encode("!user123"));
         user.setCreatedAt(LocalDateTime.now());
         user.setIsVerified(true);
+        user.setIsTwoFactorEnabled(false);
         user.setRoles(Set.of(userRole));
 
 
         userRepository.saveAll(List.of(admin, user));
+
+        userRepository.confirmEmail(user.getEmail());
 
         Ingredient ingredient = new Ingredient();
         ingredient.setAmountType(AmountType.MG);

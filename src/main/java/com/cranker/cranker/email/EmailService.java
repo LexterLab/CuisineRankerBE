@@ -42,4 +42,16 @@ public class EmailService {
     public void sendChangedEmailEmail(String[] recipients, String recipientName) throws MessagingException {
         sender.sendChangedEmailEmail(recipients, recipientName);
     }
+
+    @Async
+    @Transactional
+    public void sendTwoFactorStatusEmail(User user) throws MessagingException {
+        sender.sendTwoFactorStatusEmail(user);
+    }
+
+    @Async
+    @Transactional
+    public void sendTwoFactorEmail(User user, String code) throws MessagingException {
+        sender.sendTwoFactorEmail(user, code);
+    }
 }

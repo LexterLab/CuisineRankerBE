@@ -32,7 +32,8 @@ public class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value("user user"))
                 .andExpect(jsonPath("$.email").value("user@gmail.com"))
-                .andExpect(jsonPath("$.isVerified").value(false));
+                .andExpect(jsonPath("$.isVerified").value(true))
+                .andExpect(jsonPath("$.isTwoFactorEnabled").value(false));
     }
 
     @Test
