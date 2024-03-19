@@ -18,4 +18,5 @@ public interface Messages {
     String OLD_EMAIL_WRONG = "Provided old email is incorrect";
     String EMAIL_NOT_CHANGED = "Please provide a new email";
     String ENABLED_2FA = "User has enabled 2FA, 2FA code was sent to email: ";
+    String TOKEN_DONT_MATCH_USER = "Provided token doesn't match the user";
 }
