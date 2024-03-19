@@ -210,5 +210,18 @@ public class AuthenticationService {
        logger.info("Sent successfully email to notify user of switching 2FA mode");
    }
 
+    @Transactional
+    public void confirmTwoFactorAuthentication(TwoFactorRequestDTO requestDTO, String email) {
 
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+        User tokenUser = twoFactorTokenService.getUserByToken(requestDTO.token());
+
+        if (!user.getEmail().equals(tokenUser.getEmail())) {
+            throw new APIException(HttpStatus.UNAUTHORIZED, Messages.TOKEN_DONT_MATCH_USER);
+        }
+
+        twoFactorTokenService.confirmToken(requestDTO.token());
+    }
 }

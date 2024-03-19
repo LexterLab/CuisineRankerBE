@@ -205,4 +205,24 @@ public class AuthenticationController {
         authenticationService.changeTwoFactorAuthenticationMode(authentication.getName());
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(
+            summary = "Confirm Two-Factor authentication token REST API",
+            description = "Confirms and validates 2FA token"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "204", description = "Http Status 204 NO CONTENT"),
+            @ApiResponse( responseCode = "400", description = "Http Status 400 BAD REQUEST"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @PreAuthorize("hasRole('USER')")
+    @PatchMapping("two-factor/confirm")
+    public ResponseEntity<Void> confirmTwoFactorCode(TwoFactorRequestDTO requestDTO, Authentication authentication) {
+        authenticationService.confirmTwoFactorAuthentication(requestDTO, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
 }
