@@ -47,15 +47,15 @@ public class AuthenticationService {
 
     @Transactional
     public JWTAuthenticationResponse login(LoginRequestDTO loginRequestDTO) throws MessagingException {
-        User user = userRepository.findUserByEmailIgnoreCase(loginRequestDTO.email())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", loginRequestDTO.email()));
-
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password()));
         logger.info("{} authenticated successfully", loginRequestDTO.email());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         JWTAuthenticationResponse authenticationResponse = new JWTAuthenticationResponse();
+
+        User user = userRepository.findUserByEmailIgnoreCase(loginRequestDTO.email())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", loginRequestDTO.email()));
 
         if (user.getIsTwoFactorEnabled()) {
             logger.info(Messages.ENABLED_2FA + ": {}", loginRequestDTO.email());
@@ -200,7 +200,7 @@ public class AuthenticationService {
                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
 
        if (!user.getIsVerified()) {
-           throw new APIException(HttpStatus.BAD_REQUEST, "You need verify email first!");
+           throw new APIException(HttpStatus.BAD_REQUEST, Messages.NOT_VERIFIED);
        }
 
        userRepository.switchTwoFactorAuth(email, !user.getIsTwoFactorEnabled());
