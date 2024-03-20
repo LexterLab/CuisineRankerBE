@@ -221,7 +221,7 @@ public class AuthenticationController {
     )
     @PreAuthorize("hasRole('USER')")
     @PatchMapping("two-factor/confirm")
-    public ResponseEntity<Void> confirmTwoFactorCode(TwoFactorRequestDTO requestDTO, Authentication authentication) {
+    public ResponseEntity<Void> confirmTwoFactorCode(@Valid @RequestBody TwoFactorRequestDTO requestDTO, Authentication authentication) {
         authenticationService.confirmTwoFactorAuthentication(requestDTO, authentication.getName());
         return ResponseEntity.noContent().build();
     }
