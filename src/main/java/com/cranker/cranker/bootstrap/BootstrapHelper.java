@@ -48,18 +48,14 @@ public class BootstrapHelper {
         ProfilePicture pfp3 = new ProfilePicture();
         pfp3.setCategory(starter);
         pfp3.setName("Jasmine");
-        pfp3.setUrl("https://cdn.discordapp.com/attachments/1220059971534852221/1220062644502007838/female3.png?ex=660d92e2&is=65fb1de2&hm=d39b0a2b822ee2a91c3b32a0ea5707a3a7f9cfee8b4166cb5f80b7946dd3e784&");
+        pfp3.setUrl("https://cdn.discordapp.com/attachments/1220059971534852221/1220083256964153475/female2.png?ex=660da614&is=65fb3114&hm=a0047e7242fa967130f0ce9cf702c0de500b2d67f72e6ace7517508426e2fb92&");
 
         ProfilePicture pfp4 = new ProfilePicture();
         pfp4.setCategory(starter);
         pfp4.setName("William");
         pfp4.setUrl("https://cdn.discordapp.com/attachments/1220059971534852221/1220062869228621917/cat3.png?ex=660d9317&is=65fb1e17&hm=fc4efdbc31443143bac7835de14d8ea7e5a127a09100791832c1e645d6b70705&");
 
-
         profilePictureRepository.saveAll(List.of(pfp1, pfp2, pfp3, pfp4));
-
-
-
 
         User admin = new User();
         admin.setFirstName("admin");
