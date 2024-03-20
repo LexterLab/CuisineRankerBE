@@ -81,4 +81,23 @@ public class UserController {
         return ResponseEntity.ok(service.changeUserPersonalInfo(authentication.getName(),requestDTO));
     }
 
+    @Operation(
+            summary = "Change User Profile Picture REST API",
+            description = "Change User Profile Picture REST API is used to change user's profile picture"
+    )
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "200", description = "Http Status 200 SUCCESS"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @PreAuthorize("hasRole('USER')")
+    @PatchMapping("/pictures")
+    public ResponseEntity<UserDTO> changeUserProfilePicture(Authentication authentication,
+                                                                   @RequestParam String pictureName) {
+        return ResponseEntity.ok(service.changeUserProfilePicture(authentication.getName(), pictureName));
+    }
+
 }
