@@ -1,10 +1,9 @@
 package com.cranker.cranker.unit.user;
 
 import com.cranker.cranker.exception.ResourceNotFoundException;
-import com.cranker.cranker.user.User;
 import com.cranker.cranker.user.UserController;
-import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.UserService;
+import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,11 +14,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-
 import org.springframework.security.access.AccessDeniedException;
-
-import java.util.Optional;
+import org.springframework.security.core.Authentication;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,7 +43,7 @@ class UserControllerUnitTest {
 
     @Test
     public void shouldReturnUserInfoWhenGivenValidUsernameOrEmail() {
-        UserDTO expectedUser = new UserDTO(1L,"Michael Myers", "michael@example.com", true, true);
+        UserDTO expectedUser = new UserDTO(1L,"Michael Myers", "michael@example.com", "URL",true, true);
 
         when(authentication.getName()).thenReturn("michael@example.com");
         when(userService.retrieveUserInfo("michael@example.com")).thenReturn(expectedUser);

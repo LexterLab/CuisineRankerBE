@@ -14,6 +14,7 @@ import java.util.List;
 public interface UserResponseMapper {
     UserResponseMapper INSTANCE = Mappers.getMapper(UserResponseMapper.class);
     @Mapping(expression = "java(user.getFirstName() + ' ' + user.getLastName())", target = "name")
+    @Mapping(expression = "java(user.getSelectedPic().getUrl())", target = "profilePicURL")
     UserDTO entityToDTO(User user);
 
     UserRequestDTO entityToRequestDTO(User user);
