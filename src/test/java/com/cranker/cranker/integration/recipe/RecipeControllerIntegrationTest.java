@@ -48,21 +48,21 @@ public class RecipeControllerIntegrationTest {
 
     @Test
     void shouldReturnUnAuthorizedWhenNoUserProvided() throws Exception {
-        mockMvc.perform(delete("/api/v1/recipes/personal?id=1"))
+        mockMvc.perform(delete("/api/v1/recipes/personal/1"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(username = "user@gmail.com", roles = "USER")
     void shouldRespondWithNoContentWhenProvidedValidParamsDeletingPersonalRecipe() throws Exception {
-        mockMvc.perform(delete("/api/v1/recipes/personal?id=1"))
+        mockMvc.perform(delete("/api/v1/recipes/personal/1"))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @WithMockUser(username = "user@gmail.com", roles = "USER")
     void shouldRespondWithNotFoundWhenProvidedUnExistingIdDeletingPersonalRecipe() throws Exception {
-        mockMvc.perform(delete("/api/v1/recipes/personal?id=2"))
+        mockMvc.perform(delete("/api/v1/recipes/personal/2"))
                 .andExpect(status().isNotFound());
     }
 }
