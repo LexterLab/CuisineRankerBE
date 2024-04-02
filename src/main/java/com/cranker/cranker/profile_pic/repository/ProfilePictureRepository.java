@@ -9,5 +9,5 @@ import java.util.Set;
 
 public interface ProfilePictureRepository extends JpaRepository<ProfilePicture, Long> {
     Optional<ProfilePicture> findByNameIgnoreCase(String name);
-    Set<ProfilePicture> findAllByCategoryName(String name);
+    List<ProfilePicture> findAllByCategoryName(String name);
 }

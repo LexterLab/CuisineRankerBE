@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,7 +31,7 @@ public class AuthenticationHelper {
         return user;
     }
     private void setPictures(User user) {
-        Set<ProfilePicture> starterPictures = profilePictureRepository.findAllByCategoryName("STARTER");
+        List<ProfilePicture> starterPictures = profilePictureRepository.findAllByCategoryName("STARTER");
         user.setProfilePictures(starterPictures);
         Optional<ProfilePicture> defaultProfilePic = profilePictureRepository.findByNameIgnoreCase("Rattingam");
         defaultProfilePic.ifPresent(user::setSelectedPic);

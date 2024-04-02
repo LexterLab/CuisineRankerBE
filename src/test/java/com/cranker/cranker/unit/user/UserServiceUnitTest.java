@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -98,7 +97,7 @@ public class UserServiceUnitTest {
                 picture.getCategory().getName());
         List<PictureDTO> userPictures = List.of(pictureDTO);
         User user = new User();
-        user.setProfilePictures(Set.of(picture));
+        user.setProfilePictures(List.of(picture));
 
 
         when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
