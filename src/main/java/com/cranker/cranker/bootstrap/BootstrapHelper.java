@@ -76,7 +76,7 @@ public class BootstrapHelper {
         user.setIsTwoFactorEnabled(false);
         user.setRoles(Set.of(userRole));
         user.setSelectedPic(pfp4);
-        user.setProfilePictures(Set.of(pfp1, pfp2, pfp3, pfp4));
+        user.setProfilePictures(List.of(pfp1, pfp2, pfp3, pfp4));
 
 
         userRepository.saveAll(List.of(admin, user));
