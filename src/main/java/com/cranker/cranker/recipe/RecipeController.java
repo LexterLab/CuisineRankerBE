@@ -1,6 +1,7 @@
 package com.cranker.cranker.recipe;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -54,9 +55,10 @@ public class RecipeController {
             name = "Bearer Authentication"
     )
     @PreAuthorize("hasRole('USER')")
-    @DeleteMapping("personal")
-    public ResponseEntity<Void> deleteUserPersonalRecipe(@RequestParam Long id, Authentication authentication) {
-        recipeService.deletePersonalRecipe(authentication.getName(), id);
+    @DeleteMapping("personal/{recipeId}")
+    public ResponseEntity<Void> deleteUserPersonalRecipe(@PathVariable @Schema(example = "1") Long recipeId,
+                                                         Authentication authentication) {
+        recipeService.deletePersonalRecipe(authentication.getName(), recipeId);
         return ResponseEntity.noContent().build();
     }
 
