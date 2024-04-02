@@ -2,8 +2,8 @@ package com.cranker.cranker.user;
 
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
+import com.cranker.cranker.profile_pic.payload.PictureDTO;
 import com.cranker.cranker.profile_pic.payload.PictureMapper;
-import com.cranker.cranker.profile_pic.payload.PicturesDTO;
 import com.cranker.cranker.profile_pic.repository.ProfilePictureRepository;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
@@ -36,7 +36,7 @@ public class UserService {
         return UserResponseMapper.INSTANCE.entityToRequestDTO(repository.save(user));
     }
 
-    public List<PicturesDTO> retrieveUserProfilePictures(String email) {
+    public List<PictureDTO> retrieveUserProfilePictures(String email) {
         User user = repository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
         logger.info("Retrieving user profile pictures for: {}", email);

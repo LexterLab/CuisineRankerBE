@@ -13,7 +13,7 @@ public interface PictureMapper {
     PictureMapper INSTANCE = Mappers.getMapper(PictureMapper.class);
 
     @Mapping(expression = "java(picture.getCategory().getName())", target = "categoryName")
-    PicturesDTO entityToDTO(ProfilePicture picture);
+    PictureDTO entityToDTO(ProfilePicture picture);
 
-    List<PicturesDTO> entityToDTO(Iterable<ProfilePicture> pictures);
+    List<PictureDTO> entityToDTO(Iterable<ProfilePicture> pictures);
 }

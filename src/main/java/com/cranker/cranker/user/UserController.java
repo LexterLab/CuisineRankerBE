@@ -1,6 +1,6 @@
 package com.cranker.cranker.user;
 
-import com.cranker.cranker.profile_pic.payload.PicturesDTO;
+import com.cranker.cranker.profile_pic.payload.PictureDTO;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,7 +58,7 @@ public class UserController {
     )
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/pictures")
-    public ResponseEntity<List<PicturesDTO>> getUserProfilePictures(Authentication authentication) {
+    public ResponseEntity<List<PictureDTO>> getUserProfilePictures(Authentication authentication) {
         return ResponseEntity.ok(service.retrieveUserProfilePictures(authentication.getName()));
     }
 
