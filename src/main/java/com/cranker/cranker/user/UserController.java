@@ -94,10 +94,10 @@ public class UserController {
             @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
     })
     @PreAuthorize("hasRole('USER')")
-    @PatchMapping("/pictures")
+    @PatchMapping("/pictures/{pictureId}")
     public ResponseEntity<UserDTO> changeUserProfilePicture(Authentication authentication,
-                                                                   @RequestParam String pictureName) {
-        return ResponseEntity.ok(service.changeUserProfilePicture(authentication.getName(), pictureName));
+                                                                   @PathVariable Long pictureId) {
+        return ResponseEntity.ok(service.changeUserProfilePicture(authentication.getName(), pictureId));
     }
 
 }

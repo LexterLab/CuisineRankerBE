@@ -43,12 +43,12 @@ public class UserService {
         return PictureMapper.INSTANCE.entityToDTO(user.getProfilePictures());
     }
 
-    public UserDTO changeUserProfilePicture(String email, String pictureName) {
+    public UserDTO changeUserProfilePicture(String email, Long pictureId) {
         User user = repository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
-        ProfilePicture picture = pictureRepository.findByNameIgnoreCase(pictureName)
-                .orElseThrow(() -> new ResourceNotFoundException("Picture", "name", pictureName));
+        ProfilePicture picture = pictureRepository.findById(pictureId)
+                .orElseThrow(() -> new ResourceNotFoundException("Picture", "Id", pictureId));
 
         user.setSelectedPic(picture);
         return UserResponseMapper.INSTANCE.entityToDTO(repository.save(user));
