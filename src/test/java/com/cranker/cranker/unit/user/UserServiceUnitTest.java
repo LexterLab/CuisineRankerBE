@@ -1,23 +1,26 @@
 package com.cranker.cranker.unit.user;
 
 import com.cranker.cranker.exception.ResourceNotFoundException;
+import com.cranker.cranker.profile_pic.model.ProfilePicture;
+import com.cranker.cranker.profile_pic.model.ProfilePictureCategory;
+import com.cranker.cranker.profile_pic.payload.PictureDTO;
+import com.cranker.cranker.profile_pic.repository.ProfilePictureRepository;
 import com.cranker.cranker.user.User;
-import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.user.UserService;
+import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 
@@ -25,15 +28,15 @@ import static org.mockito.Mockito.when;
 public class UserServiceUnitTest {
 
     @Mock
-    private UserRepository repository;
+    private UserRepository userRepository;
+
+    @Mock
+    private ProfilePictureRepository pictureRepository;
 
     @InjectMocks
     private UserService service;
 
-//    @AfterEach
-//    void tearDown() {
-//        reset(repository);
-//    }
+
 
 
     @Test
@@ -42,7 +45,12 @@ public class UserServiceUnitTest {
         User expectedUserInfo = new User();
         expectedUserInfo.setEmail(email);
 
-        when(repository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(expectedUserInfo));
+        ProfilePicture profilePicture = new ProfilePicture();
+        profilePicture.setUrl("url");
+
+        expectedUserInfo.setSelectedPic(profilePicture);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(expectedUserInfo));
 
         UserDTO result = service.retrieveUserInfo(email);
 
@@ -55,27 +63,102 @@ public class UserServiceUnitTest {
 
         UserRequestDTO requestDTO = new UserRequestDTO("Alfred", "Hitch");
 
-        when(repository.findUserByEmailIgnoreCase(invalidEmail)).thenThrow(ResourceNotFoundException.class);
+        when(userRepository.findUserByEmailIgnoreCase(invalidEmail)).thenThrow(ResourceNotFoundException.class);
 
         assertThrows(ResourceNotFoundException.class, () -> service.retrieveUserInfo(invalidEmail));
         assertThrows(ResourceNotFoundException.class, () -> service.changeUserPersonalInfo(invalidEmail, requestDTO));
     }
 
-    @Test
+     @Test
      void shouldChangeUserPersonalInfoWhenProvidedValidEmail() {
         UserRequestDTO expectedUserInfo = new UserRequestDTO("Alfred", "Hitch");
         String email = "michael@example.com";
         User user = new User();
 
 
-        when(repository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
-        when(repository.save(user)).thenReturn(user);
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
 
         UserRequestDTO changedUserInfo = service.changeUserPersonalInfo(email, expectedUserInfo);
 
         assertEquals(expectedUserInfo, changedUserInfo);
     }
 
+    @Test
+    void shouldRetrieveUserProfilePictures() {
+        String email = "michael@example.com";
+        ProfilePictureCategory category = new ProfilePictureCategory(1L, "STARTER");
+        ProfilePicture picture = new ProfilePicture();
+        picture.setId(1L);
+        picture.setName("Rattingam");
+        picture.setUrl("url");
+        picture.setCategory(category);
+        PictureDTO pictureDTO = new PictureDTO(picture.getId(), picture.getName(), picture.getUrl(),
+                picture.getCategory().getName());
+        List<PictureDTO> userPictures = List.of(pictureDTO);
+        User user = new User();
+        user.setProfilePictures(List.of(picture));
 
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+
+        List<PictureDTO> retrievedPictures = service.retrieveUserProfilePictures(email);
+
+        assertEquals(userPictures, retrievedPictures);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundWhenProvidedUnExistingEmailWhenRetrievingUserPictures() {
+        String unexisting = "michael2@example.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(unexisting)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.retrieveUserProfilePictures(unexisting));
+    }
+
+    @Test
+    void shouldChangeUserProfilePicture() {
+        String email = "michael@example.com";
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(email);
+        user.setIsVerified(true);
+        user.setIsTwoFactorEnabled(true);
+
+        Long pictureId = 1L;
+        ProfilePicture profilePicture = new ProfilePicture();
+        profilePicture.setId(pictureId);
+        profilePicture.setUrl("url");
+
+        user.setSelectedPic(profilePicture);
+        UserDTO expectedUser = new UserDTO(user.getId(), null, user.getEmail(),
+                user.getSelectedPic().getUrl(), user.getIsVerified(), user.getIsTwoFactorEnabled());
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(pictureRepository.findById(pictureId)).thenReturn(Optional.of(profilePicture));
+        when(userRepository.save(user)).thenReturn(user);
+
+        UserDTO updatedUser = service.changeUserProfilePicture(email, pictureId);
+
+        assertEquals(expectedUser.profilePicURL(), updatedUser.profilePicURL());
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundWhenProvidedUnExistingEmailWhenChangingProfilePicture() {
+        String unexisting = "michael323@example.com";
+
+
+        when(userRepository.findUserByEmailIgnoreCase(unexisting)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.changeUserProfilePicture(unexisting, 1L));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundWhenProvidedUnExistingPictureIdentifierWhenChangingProfilePicture() {
+        String email = "michael@example.com";
+        long unexistingId = 0L;
+
+        assertThrows(ResourceNotFoundException.class, () -> service.changeUserProfilePicture(email, unexistingId));
+    }
 
 }

@@ -33,8 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -82,13 +81,17 @@ public class AuthenticationServiceUnitTest {
 
 
     @Test
-    void shouldReturnAccessTokenAndRefreshTokenWhenSignedIn() {
+    void shouldReturnAccessTokenAndRefreshTokenWhenSignedIn() throws MessagingException {
         Authentication authentication = mock(Authentication.class);
         LoginRequestDTO loginRequestDTO = new LoginRequestDTO("valid@example.com", "password");
+        User user = new User();
+        user.setEmail(loginRequestDTO.email());
+        user.setIsTwoFactorEnabled(false);
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
         when(tokenProvider.generateToken(authentication.getName(), JwtType.ACCESS)).thenReturn("access_token");
         when(tokenProvider.generateToken(authentication.getName(), JwtType.REFRESH)).thenReturn("refresh_token");
+        when(userRepository.findUserByEmailIgnoreCase(loginRequestDTO.email())).thenReturn(Optional.of(user));
 
         JWTAuthenticationResponse response = authenticationService.login(loginRequestDTO);
 
@@ -257,6 +260,194 @@ public class AuthenticationServiceUnitTest {
 
 
         assertThrows(APIException.class, () -> authenticationService.changePassword(requestDTO, email));
+    }
+
+    @Test
+    void shouldRequestChangeUserEmail() throws MessagingException {
+        String email = "user@gmail.com";
+        String newEmail = "user2@gmail.com";
+        String emailUrl = "url";
+        String token = "token";
+        User user = new User();
+        user.setEmail(email);
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO(email, newEmail);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(properties.getChangeEmailURL()).thenReturn(emailUrl);
+        when(tokenService.generateToken(user)).thenReturn(token);
+
+        doNothing().when(emailService).sendChangeEmailRequestEmail(any(User.class), any(String.class), any(String.class));
+
+        authenticationService.requestChangeUserEmail(requestDTO, email);
+
+        verify(emailService).sendChangeEmailRequestEmail(any(User.class), any(String.class), any(String.class));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenProvidedWrongEmailWhenRequestingChangeEmail() {
+        String email = "user@gmail.com";
+        String newEmail = "user2@gmail.com";
+        String wrongEmail = "wrong@gmail.com";
+        User user = new User();
+        user.setEmail(email);
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO(wrongEmail, newEmail);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+
+        assertThrows(APIException.class, () -> authenticationService.requestChangeUserEmail(requestDTO, email));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenProvidedSameEmailWhenRequestingChangeEmail() {
+        String email = "user@gmail.com";
+        String newEmail = "user@gmail.com";
+        User user = new User();
+        user.setEmail(email);
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO(email, newEmail);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+
+        assertThrows(APIException.class, () -> authenticationService.requestChangeUserEmail(requestDTO, email));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenProvidedExistingEmailWhenRequestingChangeEmail() {
+        String email = "user@gmail.com";
+        String newEmail = "user2@gmail.com";
+        User user = new User();
+        user.setEmail(email);
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO(email, newEmail);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmailIgnoreCase(newEmail)).thenReturn(true);
+
+        assertThrows(APIException.class, () -> authenticationService.requestChangeUserEmail(requestDTO, email));
+    }
+
+    @Test
+    void shouldChangeEmail() throws MessagingException {
+        String email = "user@gmail.com";
+        String newEmail = "user2@gmail.com";
+        String token = "token";
+        User user = new User();
+        user.setFirstName("name");
+        user.setEmail(email);
+        User modifiedUser = new User();
+        modifiedUser.setEmail(newEmail);
+        modifiedUser.setFirstName("name");
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        doNothing().when(tokenService).confirmToken(any(String.class));
+        when(tokenProvider.getUsername(token)).thenReturn(newEmail);
+        when(userRepository.save(user)).thenReturn(modifiedUser);
+        doNothing().when(emailService).sendChangedEmailEmail(any(String[].class), any(String.class));
+
+        authenticationService.changeUserEmail(email, token);
+
+        assertEquals(newEmail, modifiedUser.getEmail());
+    }
+
+
+    @Test
+    void shouldEnableUsers2FAMode() throws MessagingException {
+        String email = "user@gmail.com";
+        User user = new User();
+        user.setFirstName("name");
+        user.setEmail(email);
+        user.setIsTwoFactorEnabled(false);
+        user.setIsVerified(true);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        doNothing().when(emailService).sendTwoFactorStatusEmail(any(User.class));
+
+        authenticationService.changeTwoFactorAuthenticationMode(email);
+
+        verify(userRepository).switchTwoFactorAuth(email, !user.getIsTwoFactorEnabled());
+    }
+
+    @Test
+    void shouldDisableUsers2FAMode() throws MessagingException {
+        String email = "user@gmail.com";
+        User user = new User();
+        user.setFirstName("name");
+        user.setEmail(email);
+        user.setIsTwoFactorEnabled(true);
+        user.setIsVerified(true);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        doNothing().when(emailService).sendTwoFactorStatusEmail(any(User.class));
+
+        authenticationService.changeTwoFactorAuthenticationMode(email);
+
+        verify(userRepository).switchTwoFactorAuth(email, !user.getIsTwoFactorEnabled());
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenUnverifiedUserChangesTwoFactorMode() {
+        String email = "user@gmail.com";
+        User user = new User();
+        user.setFirstName("name");
+        user.setEmail(email);
+        user.setIsVerified(false);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+
+        assertThrows(APIException.class, () -> authenticationService.changeTwoFactorAuthenticationMode(email));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundWhenUnexistingUserChanges2FAMode() {
+        String email = "unexisting@gmail.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> authenticationService
+                .changeTwoFactorAuthenticationMode(email));
+    }
+
+    @Test
+    void shouldConfirm2FACode() {
+        String email = "user@gmail.com";
+        User user = new User();
+        user.setFirstName("name");
+        user.setEmail(email);
+        TwoFactorRequestDTO requestDTO = new TwoFactorRequestDTO("563");
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(tokenService.getUserByToken(requestDTO.token())).thenReturn(user);
+        doNothing().when(tokenService).confirmToken(requestDTO.token());
+
+        authenticationService.confirmTwoFactorAuthentication(requestDTO, email);
+
+        verify(tokenService).confirmToken(requestDTO.token());
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundWhenUnexistingUserConfirms2FACode() {
+        String email = "unexisting@gmail.com";
+        TwoFactorRequestDTO requestDTO = new TwoFactorRequestDTO("563");
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> authenticationService
+                .confirmTwoFactorAuthentication(requestDTO, email));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenUserAndTokenDontMatch() {
+        String email = "user@gmail.com";
+        String tokenEmail = "user2@gmail.com";
+        User user = new User();
+        user.setFirstName("name");
+        user.setEmail(email);
+        User tokenUser = new User();
+        tokenUser.setEmail(tokenEmail);
+        TwoFactorRequestDTO requestDTO = new TwoFactorRequestDTO("563");
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(tokenService.getUserByToken(requestDTO.token())).thenReturn(tokenUser);
+
+        assertThrows(APIException.class, () ->authenticationService.confirmTwoFactorAuthentication(requestDTO,email));
     }
 
 

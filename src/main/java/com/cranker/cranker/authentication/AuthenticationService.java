@@ -26,6 +26,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -36,17 +38,32 @@ public class AuthenticationService {
     private final AuthenticationHelper helper;
     private final TokenService emailConfirmationTokenService;
     private final TokenService resetPasswordTokenService;
+    private final TokenService changeEmailTokenService;
+    private final TokenService twoFactorTokenService;
     private final EmailService emailService;
     private final Properties properties;
     private final PasswordEncoder encoder;
     private final Logger logger = LogManager.getLogger(this);
 
-    public JWTAuthenticationResponse login(LoginRequestDTO loginRequestDTO) {
+    @Transactional
+    public JWTAuthenticationResponse login(LoginRequestDTO loginRequestDTO) throws MessagingException {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password()));
         logger.info("{} authenticated successfully", loginRequestDTO.email());
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
         JWTAuthenticationResponse authenticationResponse = new JWTAuthenticationResponse();
+
+        User user = userRepository.findUserByEmailIgnoreCase(loginRequestDTO.email())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", loginRequestDTO.email()));
+
+        if (user.getIsTwoFactorEnabled()) {
+            logger.info(Messages.ENABLED_2FA + ": {}", loginRequestDTO.email());
+            String token = twoFactorTokenService.generateToken(user);
+            emailService.sendTwoFactorEmail(user, token);
+            authenticationResponse.setIsTwoFactor(true);
+        }
+
         authenticationResponse.setAccessToken(tokenProvider.generateToken(authentication.getName(), JwtType.ACCESS));
         authenticationResponse.setRefreshToken(tokenProvider.generateToken(authentication.getName(), JwtType.REFRESH));
         return authenticationResponse;
@@ -132,5 +149,79 @@ public class AuthenticationService {
         response.setAccessToken(tokenProvider.generateToken(user.getEmail(), JwtType.ACCESS));
         logger.info("Refreshed access token for User: {}", user.getEmail());
         return response;
+    }
+
+    public void requestChangeUserEmail(ChangeEmailRequestDTO requestDTO, String email) throws MessagingException {
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+        if (!user.getEmail().equals(requestDTO.oldEmail())) {
+            logger.error("User {} provided incorrect old email", email);
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.OLD_EMAIL_WRONG);
+        }
+
+        if (requestDTO.oldEmail().equals(requestDTO.newEmail())) {
+            logger.error("User {} provided same email twice", email);
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_NOT_CHANGED);
+        }
+
+        if (userRepository.existsByEmailIgnoreCase(requestDTO.newEmail())) {
+            logger.error(Messages.EMAIL_EXISTS + ": {}", requestDTO.newEmail());
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_EXISTS);
+        }
+
+        user.setEmail(requestDTO.newEmail());
+        String changeEmailURL = properties.getChangeEmailURL() + changeEmailTokenService.generateToken(user);
+        emailService.sendChangeEmailRequestEmail(user, changeEmailURL,  email);
+        logger.info("Change Email Request Email successfully sent to: {}", email);
+    }
+
+   @Transactional
+   public void changeUserEmail(String email, String value) throws MessagingException {
+       User user = userRepository.findUserByEmailIgnoreCase(email)
+               .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+       changeEmailTokenService.confirmToken(value);
+       logger.info("Token confirmed and validated: {}", value);
+
+       String newEmail = tokenProvider.getUsername(value);
+       user.setEmail(newEmail);
+       userRepository.save(user);
+       logger.info("Successfully changed email for user: {}", email);
+
+       emailService.sendChangedEmailEmail(List.of(user.getEmail(), email).toArray(new String[0]), user.getFirstName());
+       logger.info("Successfully sent email to notify email changing to new address: {}", newEmail);
+       logger.info("Successfully sent email to notify email changing to old address: {}", email);
+   }
+
+   @Transactional
+   public void changeTwoFactorAuthenticationMode(String email) throws MessagingException {
+       User user = userRepository.findUserByEmailIgnoreCase(email)
+               .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+       if (!user.getIsVerified()) {
+           throw new APIException(HttpStatus.BAD_REQUEST, Messages.NOT_VERIFIED);
+       }
+
+       userRepository.switchTwoFactorAuth(email, !user.getIsTwoFactorEnabled());
+       logger.info("User: {} set 2FA to: {}", email, !user.getIsTwoFactorEnabled());
+
+       emailService.sendTwoFactorStatusEmail(user);
+       logger.info("Sent successfully email to notify user of switching 2FA mode");
+   }
+
+    @Transactional
+    public void confirmTwoFactorAuthentication(TwoFactorRequestDTO requestDTO, String email) {
+
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+        User tokenUser = twoFactorTokenService.getUserByToken(requestDTO.token());
+
+        if (!user.getEmail().equals(tokenUser.getEmail())) {
+            throw new APIException(HttpStatus.UNAUTHORIZED, Messages.TOKEN_DONT_MATCH_USER);
+        }
+
+        twoFactorTokenService.confirmToken(requestDTO.token());
     }
 }

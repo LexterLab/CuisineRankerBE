@@ -33,7 +33,7 @@ public class AuthenticationController {
             @ApiResponse( responseCode = "400", description = "Http Status 400 BAD REQUEST")
 })
     @PostMapping("signin")
-    public ResponseEntity<JWTAuthenticationResponse> login(@Valid @RequestBody LoginRequestDTO loginDTO) {
+    public ResponseEntity<JWTAuthenticationResponse> login(@Valid @RequestBody LoginRequestDTO loginDTO) throws MessagingException {
         return ResponseEntity.ok(authenticationService.login(loginDTO));
     }
 
@@ -143,6 +143,86 @@ public class AuthenticationController {
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequestDTO requestDTO,
                                                Authentication authentication) throws MessagingException {
         authenticationService.changePassword(requestDTO, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+    @Operation(
+            summary = "Request Change Email REST API",
+            description = "Request Change email REST API is used to request to change user's email"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "204", description = "Http Status 204 NO CONTENT"),
+            @ApiResponse( responseCode = "400", description = "Http Status 400 BAD REQUEST"),
+            @ApiResponse( responseCode = "403", description = "Http Status 403 FORBIDDEN"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("change-email")
+    public ResponseEntity<Void> requestChangeEmail(@Valid @RequestBody ChangeEmailRequestDTO requestDTO,
+                                                    Authentication authentication) throws MessagingException {
+        authenticationService.requestChangeUserEmail(requestDTO, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Change Email REST API",
+            description = "Change Email REST API is used to change user's email"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "204", description = "Http Status 204 NO CONTENT"),
+            @ApiResponse( responseCode = "400", description = "Http Status 400 BAD REQUEST"),
+            @ApiResponse( responseCode = "403", description = "Http Status 403 FORBIDDEN"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @PreAuthorize("hasRole('USER')")
+    @PatchMapping("change-email/confirm")
+    public ResponseEntity<Void> changeUserEmail(@RequestParam String value, Authentication authentication) throws MessagingException {
+        authenticationService.changeUserEmail(authentication.getName(), value);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Change Two-Factor authentication mode REST API",
+            description = "Toggles on/off 2FA"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "204", description = "Http Status 204 NO CONTENT"),
+            @ApiResponse( responseCode = "400", description = "Http Status 400 BAD REQUEST"),
+            @ApiResponse( responseCode = "403", description = "Http Status 403 FORBIDDEN"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @PreAuthorize("hasRole('USER')")
+    @PatchMapping("two-factor")
+    public ResponseEntity<Void> changeTwoFactorMode(Authentication authentication) throws MessagingException {
+        authenticationService.changeTwoFactorAuthenticationMode(authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Confirm Two-Factor authentication token REST API",
+            description = "Confirms and validates 2FA token"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "204", description = "Http Status 204 NO CONTENT"),
+            @ApiResponse( responseCode = "400", description = "Http Status 400 BAD REQUEST"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @PreAuthorize("hasRole('USER')")
+    @PatchMapping("two-factor/confirm")
+    public ResponseEntity<Void> confirmTwoFactorCode(@Valid @RequestBody TwoFactorRequestDTO requestDTO, Authentication authentication) {
+        authenticationService.confirmTwoFactorAuthentication(requestDTO, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 }

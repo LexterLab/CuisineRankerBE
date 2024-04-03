@@ -9,6 +9,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -43,5 +44,25 @@ public class RecipeControllerIntegrationTest {
     void shouldReturnForbiddenWhenNoUserProvided() throws  Exception {
         mockMvc.perform(get("/api/v1/recipes/personal"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldReturnUnAuthorizedWhenNoUserProvided() throws Exception {
+        mockMvc.perform(delete("/api/v1/recipes/personal/1"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithNoContentWhenProvidedValidParamsDeletingPersonalRecipe() throws Exception {
+        mockMvc.perform(delete("/api/v1/recipes/personal/1"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithNotFoundWhenProvidedUnExistingIdDeletingPersonalRecipe() throws Exception {
+        mockMvc.perform(delete("/api/v1/recipes/personal/2"))
+                .andExpect(status().isNotFound());
     }
 }

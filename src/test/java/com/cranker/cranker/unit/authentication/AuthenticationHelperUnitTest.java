@@ -2,6 +2,8 @@ package com.cranker.cranker.unit.authentication;
 
 import com.cranker.cranker.authentication.AuthenticationHelper;
 import com.cranker.cranker.authentication.payload.SignUpRequestDTO;
+import com.cranker.cranker.profile_pic.model.ProfilePicture;
+import com.cranker.cranker.profile_pic.repository.ProfilePictureRepository;
 import com.cranker.cranker.role.Role;
 import com.cranker.cranker.role.RoleRepository;
 import com.cranker.cranker.user.User;
@@ -14,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,6 +30,9 @@ public class AuthenticationHelperUnitTest {
     private RoleRepository roleRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private ProfilePictureRepository pictureRepository;
     @InjectMocks
     private AuthenticationHelper authenticationHelper;
 
@@ -53,6 +59,35 @@ public class AuthenticationHelperUnitTest {
         User updatedUser = authenticationHelper.buildUser(requestDTO);
 
         assertEquals(roles, updatedUser.getRoles());
+    }
+
+    @Test
+    void shouldSetDefaultProfilePic() {
+        ProfilePicture profilePicture = new ProfilePicture();
+
+        SignUpRequestDTO requestDTO = new SignUpRequestDTO("User", "User", "password123",
+                "password123", "user@example.com");
+
+        when(pictureRepository.findByNameIgnoreCase("Rattingam")).thenReturn(Optional.of(profilePicture));
+
+        User updatedUser = authenticationHelper.buildUser(requestDTO);
+
+        assertEquals(profilePicture, updatedUser.getSelectedPic());
+    }
+
+    @Test
+    void shouldSetStarterPicsWhenSigningUp() {
+        ProfilePicture starterPicture = new ProfilePicture();
+        List<ProfilePicture> starterPictures = List.of(starterPicture);
+        SignUpRequestDTO requestDTO = new SignUpRequestDTO("User", "User", "password123",
+                "password123", "user@example.com");
+
+        when(pictureRepository.findAllByCategoryName("STARTER")).thenReturn(starterPictures);
+
+        User updatedUser = authenticationHelper.buildUser(requestDTO);
+
+        assertEquals(starterPictures, updatedUser.getProfilePictures());
+
     }
 
     @Test

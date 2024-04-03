@@ -1,5 +1,6 @@
 package com.cranker.cranker.user;
 
+import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.role.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -44,10 +46,26 @@ public class User {
     @ColumnDefault(value = "false")
     private Boolean isVerified;
 
+    @Generated
+    @ColumnDefault(value = "false")
+    private Boolean isTwoFactorEnabled;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "pic_id")
+    private ProfilePicture selectedPic;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
     )
     private Set<Role> roles;
+
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable(name = "user_picture",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "pic_id", referencedColumnName = "id")
+    )
+    private List<ProfilePicture> profilePictures;
 }

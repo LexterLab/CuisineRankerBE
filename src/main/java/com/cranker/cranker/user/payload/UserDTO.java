@@ -8,5 +8,8 @@ public record UserDTO(
         String name,
         @Schema(example = "jordan@gmail.com")
         String email,
-        Boolean isVerified
+        @Schema(example = "URL of picture")
+        String profilePicURL,
+        Boolean isVerified,
+        Boolean isTwoFactorEnabled
 ){}

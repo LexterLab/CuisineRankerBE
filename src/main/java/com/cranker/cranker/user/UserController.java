@@ -1,5 +1,6 @@
 package com.cranker.cranker.user;
 
+import com.cranker.cranker.profile_pic.payload.PictureDTO;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/users")
@@ -41,6 +44,25 @@ public class UserController {
     }
 
     @Operation(
+            summary = "User profile pictures Retrieval REST API",
+            description = "User profile pictures Retrieval REST API is used to retrieve user's profile pictures"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "200", description = "Http Status 200 SUCCESS"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "403", description = "Http Status 403 FORBIDDEN"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/pictures")
+    public ResponseEntity<List<PictureDTO>> getUserProfilePictures(Authentication authentication) {
+        return ResponseEntity.ok(service.retrieveUserProfilePictures(authentication.getName()));
+    }
+
+    @Operation(
             summary = "Change User Personal Info REST API",
             description = "Change User Personal Info REST API is used to modify user's personal info"
     )
@@ -57,6 +79,25 @@ public class UserController {
     public ResponseEntity<UserRequestDTO> changeUserPersonalInfo(Authentication authentication,
                                                                  @Valid @RequestBody UserRequestDTO requestDTO) {
         return ResponseEntity.ok(service.changeUserPersonalInfo(authentication.getName(),requestDTO));
+    }
+
+    @Operation(
+            summary = "Change User Profile Picture REST API",
+            description = "Change User Profile Picture REST API is used to change user's profile picture"
+    )
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "200", description = "Http Status 200 SUCCESS"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @PreAuthorize("hasRole('USER')")
+    @PatchMapping("/pictures/{pictureId}")
+    public ResponseEntity<UserDTO> changeUserProfilePicture(Authentication authentication,
+                                                                   @PathVariable Long pictureId) {
+        return ResponseEntity.ok(service.changeUserProfilePicture(authentication.getName(), pictureId));
     }
 
 }

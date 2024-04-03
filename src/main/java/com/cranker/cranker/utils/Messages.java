@@ -2,7 +2,6 @@ package com.cranker.cranker.utils;
 
 public interface Messages {
     String USER_SUCCESSFULLY_REGISTERED = "Your Account has been created successfully.";
-    String PASSWORDS_DONT_MATCH = "Password don't match";
     String USER_NOT_FOUND_WITH_EMAIL = "User not found with email: ";
     String EMAIL_EXISTS = "Email already exists!";
     String INVALID_JWT_TOKEN = "{\"message\": \"Invalid JWT Token\"}";
@@ -16,4 +15,11 @@ public interface Messages {
     String WRONG_TOKEN_TYPE = "Provided token is not for this type of operation";
     String OLD_PASSWORD_WRONG = "Provided current password is incorrect";
     String PASSWORD_NOT_CHANGED = "Please provide a new password";
+    String OLD_EMAIL_WRONG = "Provided old email is incorrect";
+    String EMAIL_NOT_CHANGED = "Please provide a new email";
+    String ENABLED_2FA = "User has enabled 2FA, 2FA code was sent to email: ";
+    String TOKEN_DONT_MATCH_USER = "Provided token doesn't match the user";
+
+    String NOT_VERIFIED = "You need to verify your email first!";
+    String PASSWORDS_DONT_MATCH = "Passwords don't match";
 }

@@ -1,29 +1,18 @@
 package com.cranker.cranker.integration.authentication;
 
-import com.cranker.cranker.authentication.AuthenticationController;
-import com.cranker.cranker.authentication.AuthenticationService;
-import com.cranker.cranker.authentication.jwt.JWTAuthenticationResponse;
-import com.cranker.cranker.authentication.jwt.JwtRefreshRequestDTO;
-import com.cranker.cranker.authentication.payload.ChangePasswordRequestDTO;
-import com.cranker.cranker.authentication.payload.ForgotPasswordRequestDTO;
-import com.cranker.cranker.authentication.payload.LoginRequestDTO;
-import com.cranker.cranker.authentication.payload.SignUpRequestDTO;
+import com.cranker.cranker.authentication.payload.*;
 import com.cranker.cranker.email.EmailService;
+import com.cranker.cranker.token.TokenService;
 import com.cranker.cranker.user.User;
-import com.cranker.cranker.utils.Messages;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -31,9 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -48,11 +37,10 @@ public class AuthenticationControllerIntegrationTest {
     private EmailService emailService;
 
 
-
-
     @BeforeEach
     void setUp() throws MessagingException {
         doNothing().when(emailService).sendChangedPasswordEmail(any(User.class));
+        doNothing().when(emailService).sendChangeEmailRequestEmail(any(User.class), any(String.class), any(String.class));
     }
     @Test
     void shouldRespondWithNoContentWhenLoggedOut() throws Exception {
@@ -71,7 +59,8 @@ public class AuthenticationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").exists())
                 .andExpect(jsonPath("$.tokenType").exists())
-                .andExpect(jsonPath("$.refreshToken").exists());
+                .andExpect(jsonPath("$.refreshToken").exists())
+                .andExpect(jsonPath("$.isTwoFactor").exists());
     }
 
     @Test
@@ -110,24 +99,6 @@ public class AuthenticationControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-//    @Test
-//    void shouldRespondWithCreatedAndAccessTokensWhenProvidedValidRefreshToken() throws Exception {
-//        JwtRefreshRequestDTO requestDTO = new JwtRefreshRequestDTO("refresh_token");
-//
-//        when(authenticationService.refreshToken(any()))
-//                .thenReturn(new JWTAuthenticationResponse("access_token", "bearer",
-//                        "refresh_token"));
-//
-//        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/refresh-token")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(requestDTO)))
-//                .andExpect(status().isCreated())
-//                .andExpect(jsonPath("$.accessToken").exists())
-//                .andExpect(jsonPath("$.tokenType").exists())
-//                .andExpect(jsonPath("$.refreshToken").exists())
-//                .andExpect(jsonPath("$.refreshToken").value(requestDTO.refreshToken()));
-//    }
 
     @Test
     @WithMockUser(username = "user@gmail.com", roles = "USER")
@@ -192,6 +163,59 @@ public class AuthenticationControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(requestDTO)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithBadRequestWhenRequestingChangeEmailWithWrongOldEmail() throws Exception {
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user2@gmail.com", "new@gmail.com");
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/change-email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(requestDTO)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithBadRequestWhenRequestingChangeEmailWithIdenticalEmails() throws Exception {
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user@gmail.com", "user@gmail.com");
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/change-email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(requestDTO)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenUserNotProvidedWhenRequestingChangeEmail() throws Exception {
+        ChangeEmailRequestDTO requestDTO = new ChangeEmailRequestDTO("user@gmail.com", "user@gmail.com");
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/change-email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(requestDTO)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithNoContentWhenChanging2FAMode() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/two-factor"))
+                .andExpect(status().isNoContent());
+    }
+
+
+    @Test
+    @WithMockUser(username = "admin@gmail.com", roles = "USER")
+    void shouldRespondWithBadWhenChanging2FAModeWithUnverifiedUser() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/two-factor"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenUserNotProvidedWhenChanging2FAMode() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/two-factor"))
                 .andExpect(status().isForbidden());
     }
 }
