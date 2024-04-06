@@ -224,4 +224,20 @@ public class AuthenticationService {
 
         twoFactorTokenService.confirmToken(requestDTO.token());
     }
+
+    @Transactional
+    public void requestResendConfirmationEmail(String email) throws MessagingException {
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+        if (user.getIsVerified()) {
+            logger.error(Messages.EMAIL_ALREADY_CONFIRMED + ": {}", email);
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_ALREADY_CONFIRMED);
+        }
+
+        String code = emailConfirmationTokenService.generateToken(user);
+        String confirmationURL = properties.getEmailURL() + code;
+        emailService.sendEmailConfirmationResend(user, confirmationURL);
+        logger.info("Account confirmation email successfully resent to: {}", user.getEmail());
+    }
 }
