@@ -223,4 +223,31 @@ public class EmailSenderUnitTest {
 
         verify(javaMailSender).send(any(MimeMessage.class));
     }
+
+    @Test
+    void shouldSendResendConfirmationEmail() throws MessagingException {
+        User user = new User();
+        user.setFirstName("John");
+        user.setEmail("test@example.com");
+
+
+        String confirmationLink = "https://example.com/confirm";
+
+
+        when(properties.getEmailSender()).thenReturn("sender@example.com");
+
+
+        String emailContent = "Mock email content";
+        when(engine.process(anyString(), any(Context.class))).thenReturn(emailContent);
+
+
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+
+        emailSender.sendEmailConfirmationResend(user, confirmationLink);
+
+
+        verify(javaMailSender).send(any(MimeMessage.class));
+    }
 }

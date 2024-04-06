@@ -100,7 +100,7 @@ public class AuthenticationServiceUnitTest {
     }
 
     @Test
-    void shouldThrowAPIExceptionWhenProvidedExistingEmail() throws MessagingException {
+    void shouldThrowAPIExceptionWhenProvidedExistingEmail() {
         String existingEmail = "existing@gmail.com";
         SignUpRequestDTO requestDTO = new SignUpRequestDTO("validName", "validName", "password",
                 "password", existingEmail);
@@ -450,6 +450,45 @@ public class AuthenticationServiceUnitTest {
         assertThrows(APIException.class, () ->authenticationService.confirmTwoFactorAuthentication(requestDTO,email));
     }
 
+    @Test
+    void shouldRequestResendConfirmationEmail() throws MessagingException {
+        String email = "user@gmail.com";
+        String code  = "code";
+        String emailUrl = "url";
+        User user = new User();
+        user.setEmail(email);
+        user.setIsVerified(false);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(tokenService.generateToken(user)).thenReturn(code);
+        when(properties.getEmailURL()).thenReturn(emailUrl);
+        doNothing().when(emailService).sendEmailConfirmationResend(any(User.class), any(String.class));
+
+        authenticationService.requestResendConfirmationEmail(email);
+
+        verify(emailService).sendEmailConfirmationResend(any(User.class), any(String.class));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundWhenRequestingResendConfirmationEmailWithUnexistingEmail() {
+        String unexisting = "user@gmail.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(unexisting)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> authenticationService.requestResendConfirmationEmail(unexisting));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenRequestingResendConfirmationEmailWithConfirmedEmail() {
+        String email = "user@gmail.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setIsVerified(true);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+
+        assertThrows(APIException.class, () -> authenticationService.requestResendConfirmationEmail(email));
+    }
 
 
 }
