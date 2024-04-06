@@ -51,6 +51,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Picture", "Id", pictureId));
 
         user.setSelectedPic(picture);
+        logger.info("Set  profile picture: {} for user: {}", picture.getName(),  email);
         return UserResponseMapper.INSTANCE.entityToDTO(repository.save(user));
     }
 }
