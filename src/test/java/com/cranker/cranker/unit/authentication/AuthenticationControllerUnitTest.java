@@ -217,4 +217,13 @@ public class AuthenticationControllerUnitTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
+    @Test
+    void shouldRespondWitNoContentWhenRequestingResendConfirmationEmail() throws MessagingException {
+        String userEmail = "email@gmail.com";
+
+        ResponseEntity<Void> response = authenticationController.resendEmailConfirmation(userEmail);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
 }
