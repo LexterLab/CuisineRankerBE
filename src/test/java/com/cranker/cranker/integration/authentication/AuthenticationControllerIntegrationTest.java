@@ -218,4 +218,27 @@ public class AuthenticationControllerIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/two-factor"))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void shouldRespondWithNoContentWhenResendingEmailConfirmation() throws Exception {
+        String email = "usertwo@gmail.com";
+        mockMvc.perform(post("/api/v1/auth/confirm-email/resend?email=" + email))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRequestingResendEmailConfirmationWithConfirmedEmail() throws Exception {
+        String email = "user@gmail.com";
+        mockMvc.perform(post("/api/v1/auth/confirm-email/resend?email=" + email))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldRespondWithNotFoundWhenRequestingResendEmailConfirmationWithUnexistingEmail() throws Exception {
+        String email = "user2@gmail.com";
+        mockMvc.perform(post("/api/v1/auth/confirm-email/resend?email=" + email))
+                .andExpect(status().isNotFound());
+    }
+
+
 }
