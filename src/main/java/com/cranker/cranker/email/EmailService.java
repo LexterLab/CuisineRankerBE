@@ -54,4 +54,10 @@ public class EmailService {
     public void sendTwoFactorEmail(User user, String code) throws MessagingException {
         sender.sendTwoFactorEmail(user, code);
     }
+
+    @Async
+    @Transactional
+    public void sendEmailConfirmationResend(User user, String confirmationLink) throws MessagingException {
+        sender.sendEmailConfirmationResend(user, confirmationLink);
+    }
 }
