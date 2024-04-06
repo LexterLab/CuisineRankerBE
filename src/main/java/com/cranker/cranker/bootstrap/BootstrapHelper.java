@@ -78,8 +78,19 @@ public class BootstrapHelper {
         user.setSelectedPic(pfp4);
         user.setProfilePictures(List.of(pfp1, pfp2, pfp3, pfp4));
 
+        User user2 = new User();
+        user2.setFirstName("user2");
+        user2.setLastName("user2");
+        user2.setEmail("usertwo@gmail.com");
+        user2.setPassword(new BCryptPasswordEncoder().encode("!user1234"));
+        user2.setCreatedAt(LocalDateTime.now());
+        user2.setIsVerified(true);
+        user2.setIsTwoFactorEnabled(false);
+        user2.setRoles(Set.of(userRole));
+        user2.setSelectedPic(pfp4);
+        user2.setProfilePictures(List.of(pfp1, pfp2, pfp3, pfp4));
 
-        userRepository.saveAll(List.of(admin, user));
+        userRepository.saveAll(List.of(admin, user, user2));
 
         userRepository.confirmEmail(user.getEmail());
 
