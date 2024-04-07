@@ -37,23 +37,23 @@ public class BootstrapHelper {
 
         ProfilePicture pfp1 = new ProfilePicture();
         pfp1.setCategory(starter);
-        pfp1.setUrl("https://cdn.discordapp.com/attachments/1220059971534852221/1220060006528057394/rat1.jpg?ex=660d906d&is=65fb1b6d&hm=bff4ad0ad1e3a136d16de37a86515e29b61cf8600cc974ce2b5ae72ba9834051&");
+        pfp1.setUrl("https://i.ibb.co/mbzZL5x/rat1.jpg");
         pfp1.setName("Rattingam");
 
         ProfilePicture pfp2 = new ProfilePicture();
         pfp2.setCategory(starter);
         pfp2.setName("Billy");
-        pfp2.setUrl("https://cdn.discordapp.com/attachments/1220059971534852221/1220062597316083773/male1.png?ex=660d92d6&is=65fb1dd6&hm=00a2f6ec51a196348cc5dc707fef291c049b74b159ec60adb87b27d0ef53ff57&");
+        pfp2.setUrl("https://i.ibb.co/HqxfyS4/male1.png");
 
         ProfilePicture pfp3 = new ProfilePicture();
         pfp3.setCategory(starter);
         pfp3.setName("Jasmine");
-        pfp3.setUrl("https://cdn.discordapp.com/attachments/1220059971534852221/1220083256964153475/female2.png?ex=660da614&is=65fb3114&hm=a0047e7242fa967130f0ce9cf702c0de500b2d67f72e6ace7517508426e2fb92&");
+        pfp3.setUrl("https://i.ibb.co/MVZcQgh/female4.png");
 
         ProfilePicture pfp4 = new ProfilePicture();
         pfp4.setCategory(starter);
         pfp4.setName("William");
-        pfp4.setUrl("https://cdn.discordapp.com/attachments/1220059971534852221/1220062869228621917/cat3.png?ex=660d9317&is=65fb1e17&hm=fc4efdbc31443143bac7835de14d8ea7e5a127a09100791832c1e645d6b70705&");
+        pfp4.setUrl("https://i.ibb.co/Hd3bL9r/cat3.png");
 
         profilePictureRepository.saveAll(List.of(pfp1, pfp2, pfp3, pfp4));
 
