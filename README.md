@@ -1,9 +1,46 @@
 # Cuisine Ranker API
 
+![logo](logo.svg)
 
+# About
+
+**Cuisine Ranker is a culinary web application that is built to spice up the mundane cooking life.**
+
+**It offers a way to learn cooking/recipes with an interactive system of learning, instead of just following recipe guides.**
+
+**You can also use it for storing recipes and sharing them with your friends and family.**
+
+**There is also a competitive side, in which you can participate in different competitions and track your position**
+**on different kinds of leaderboards!**
+
+**You can find out more at: https://github.com/users/LexterLab/projects/5**
+
+## What is API?
+
+**Cuisine Ranker API is the server side of the web application, which you must have running in order for the website to**
+**properly display information and function.**
+
+## Where to find frontend?
+**You can find the frontend side of the web application at https://github.com/LexterLab/CuisineRankerFE**
+
+# Dev Environment
+**You can also find pre-released features and updates before their release by checking out the develop branch.**
+
+**You can do so by either manually selecting develop branch in your IDE/text editor or via console:**
+```bash
+git switch develop
+```
+
+# Releases
+
+**You can find every release(version) of the API by going to:  https://github.com/LexterLab/CuisineRankerBE/releases**
+
+**The latest release will always have the "Latest" tag!**
+
+# How to Run
 
 ## Prerequisites
-
+**Currently, Cuisine Ranker API can only be run with Docker.**
 + Docker https://www.docker.com/ - Need to have docker running to run commands
 
 ### Docker Installation Tutorials:
@@ -33,14 +70,30 @@ replace < path to project > with the path where you cloned the repository
 **3. After navigating to the project directory, run the backend with docker script**
 
 In Command Prompt
+
+For Windows:
 ```bash
 docker-script.bat
 ```
 
+For MacOS/Linux:
+```bash
+./docker-sh.sh
+```
+
 Or in Intellij/ Or any other IDE/Editor
+
+Windows:
 ```bash
 ./docker-script.bat
 ```
+
+MacOS/Linux:
+```bash
+./docker-sh.sh
+```
+
+
 REST API will start running at <http://localhost:443>
 
 **4. You can stop the backend from running with**
@@ -52,3 +105,4 @@ docker compose down
 ## Endpoints
 + http://localhost:443/swagger-ui/index.html - Every endpoint is documented here.
 
+![swagger](https://i.ibb.co/pRCtGHw/swagger.jpg)
