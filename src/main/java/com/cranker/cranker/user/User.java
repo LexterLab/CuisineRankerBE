@@ -55,7 +55,7 @@ public class User {
     private ProfilePicture selectedPic;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    @JoinTable(name = "user_role",
+    @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
     )
@@ -63,7 +63,7 @@ public class User {
 
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    @JoinTable(name = "user_picture",
+    @JoinTable(name = "user_pictures",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "pic_id", referencedColumnName = "id")
     )
