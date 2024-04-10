@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS recipes (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(50) NOT NULL UNIQUE,
+  preparation TEXT NOT NULL,
+  type VARCHAR(50) NOT NULL,
+  picture_url VARCHAR(255),
+  prep_time_in_minutes INTEGER NOT NULL,
+  cook_time_in_minutes INTEGER NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  user_id BIGINT,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
