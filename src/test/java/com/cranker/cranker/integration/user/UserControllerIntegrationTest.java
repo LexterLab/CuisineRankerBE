@@ -115,7 +115,7 @@ public class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.email").value("user@gmail.com"))
                 .andExpect(jsonPath("$.isVerified").value(true))
                 .andExpect(jsonPath("$.isTwoFactorEnabled").value(false))
-                .andExpect(jsonPath("$.profilePicURL").value("https://cdn.discordapp.com/attachments/1220059971534852221/1220060006528057394/rat1.jpg?ex=660d906d&is=65fb1b6d&hm=bff4ad0ad1e3a136d16de37a86515e29b61cf8600cc974ce2b5ae72ba9834051&"));
+                .andExpect(jsonPath("$.profilePicURL").value("https://i.ibb.co/mbzZL5x/rat1.jpg"));
 
     }
 
