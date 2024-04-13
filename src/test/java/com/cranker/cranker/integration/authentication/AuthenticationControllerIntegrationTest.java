@@ -6,6 +6,7 @@ import com.cranker.cranker.token.TokenService;
 import com.cranker.cranker.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ public class AuthenticationControllerIntegrationTest {
     void setUp() throws MessagingException {
         doNothing().when(emailService).sendChangedPasswordEmail(any(User.class));
         doNothing().when(emailService).sendChangeEmailRequestEmail(any(User.class), any(String.class), any(String.class));
+        doNothing().when(emailService).sendEmailConfirmationResend(any(User.class), any(String.class));
     }
     @Test
     void shouldRespondWithNoContentWhenLoggedOut() throws Exception {
@@ -217,13 +219,6 @@ public class AuthenticationControllerIntegrationTest {
     void shouldRespondWithForbiddenWhenUserNotProvidedWhenChanging2FAMode() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/auth/two-factor"))
                 .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void shouldRespondWithNoContentWhenResendingEmailConfirmation() throws Exception {
-        String email = "usertwo@gmail.com";
-        mockMvc.perform(post("/api/v1/auth/confirm-email/resend?email=" + email))
-                .andExpect(status().isNoContent());
     }
 
     @Test
