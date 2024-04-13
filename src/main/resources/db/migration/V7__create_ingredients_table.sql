@@ -4,3 +4,5 @@ CREATE TABLE IF NOT EXISTS ingredients (
     default_amount DOUBLE PRECISION NOT NULL,
     amount_type VARCHAR(50) NOT NULL
 );
+
+ALTER SEQUENCE ingredients_id_seq RESTART WITH 1;

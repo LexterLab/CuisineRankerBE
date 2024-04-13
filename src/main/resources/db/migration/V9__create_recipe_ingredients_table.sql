@@ -6,3 +6,5 @@ CREATE TABLE IF NOT EXISTS recipe_ingredients (
   FOREIGN KEY (recipe_id) REFERENCES recipes(id),
   FOREIGN KEY (ingredient_id) REFERENCES ingredients(id)
 );
+
+ALTER SEQUENCE recipe_ingredients_id_seq RESTART WITH 1;

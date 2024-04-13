@@ -5,3 +5,5 @@ CREATE TABLE IF NOT EXISTS profile_pics (
     category_id BIGINT,
     FOREIGN KEY (category_id) REFERENCES profile_pic_categories (id)
 );
+
+ALTER SEQUENCE profile_pics_id_seq RESTART WITH 1;
