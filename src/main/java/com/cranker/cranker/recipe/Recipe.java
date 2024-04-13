@@ -31,6 +31,7 @@ public class Recipe {
     @Setter(AccessLevel.NONE)
     private String type;
 
+    @Column(name = "picture_url")
     private String pictureURL;
 
     @Column(nullable = false)
