@@ -126,4 +126,27 @@ public class UserControllerIntegrationTest {
         mockMvc.perform(patch("/api/v1/users/pictures/" + pictureId))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithOKAndUserFriendList() throws Exception {
+        mockMvc.perform(get("/api/v1/users/friends"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.friendships").isArray())
+                .andExpect(jsonPath("$.friendships").isNotEmpty());
+    }
+
+    @Test
+    @WithMockUser(username = "user2@gmail.com", roles = "USER")
+    void shouldRespondWithNotFoundWhenRetrievingUserFriendListWithUnexistingUser() throws Exception {
+        mockMvc.perform(get("/api/v1/users/friends"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenRetrievingUserFriendListWithoutBeingSignedIn() throws Exception {
+        mockMvc.perform(get("/api/v1/users/friends"))
+                .andExpect(status().isForbidden());
+    }
 }

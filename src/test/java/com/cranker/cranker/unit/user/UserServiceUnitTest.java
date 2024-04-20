@@ -1,6 +1,10 @@
 package com.cranker.cranker.unit.user;
 
 import com.cranker.cranker.exception.ResourceNotFoundException;
+import com.cranker.cranker.friendship.Friendship;
+import com.cranker.cranker.friendship.FriendshipDTO;
+import com.cranker.cranker.friendship.FriendshipRepository;
+import com.cranker.cranker.friendship.FriendshipResponse;
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.model.ProfilePictureCategory;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
@@ -15,7 +19,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +39,9 @@ public class UserServiceUnitTest {
 
     @Mock
     private ProfilePictureRepository pictureRepository;
+
+    @Mock
+    private FriendshipRepository friendshipRepository;
 
     @InjectMocks
     private UserService service;
@@ -160,5 +170,62 @@ public class UserServiceUnitTest {
 
         assertThrows(ResourceNotFoundException.class, () -> service.changeUserProfilePicture(email, unexistingId));
     }
+
+    @Test
+    void shouldRetrieveUserFriendList() {
+        String email = "michael@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+        User friend = new User();
+        friend.setId(2L);
+        ProfilePicture profilePicture = new ProfilePicture();
+        profilePicture.setUrl("ur;");
+        friend.setSelectedPic(profilePicture);
+        friend.setFirstName("Friend");
+        friend.setLastName("Friend");
+
+        String sortBy = "updatedAt";
+        int pageNo = 0;
+        int pageSize = 10;
+
+        Friendship friendship = new Friendship(1L, "Active", user, friend, LocalDateTime.now(), LocalDateTime.now());
+        String updatedAtFormatted = friendship.getUpdatedAt().getDayOfMonth() + " " + DateTimeFormatter
+                .ofPattern("MMMM").format(friendship.getUpdatedAt()) + " " + friendship.getUpdatedAt().getYear();
+
+        FriendshipDTO friendshipDTO = new FriendshipDTO(1L, 2L, "Friend Friend", profilePicture.getUrl(),
+                friendship.getStatus(), updatedAtFormatted, friendship.getCreatedAt(), friendship.getUpdatedAt());
+
+
+        FriendshipResponse friendshipResponse = new FriendshipResponse(0, 10 , 1L,
+                1, true, List.of(friendshipDTO));
+
+        Sort sort = Sort.by(sortBy).ascending();
+
+
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        Page<Friendship> friendshipPage = new PageImpl<>(List.of(friendship), pageable, 1);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(friendshipRepository.findAllFriendsByUserId(user.getId(), pageable)).thenReturn(friendshipPage);
+
+        FriendshipResponse response = service.retrieveUserFriends(email,0, 10, "updatedAt", "asc");
+
+        assertEquals(friendshipResponse, response);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundWhenUserNotFoundRequestingUserFriendList() {
+        String email = "unexisting@example.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service
+                .retrieveUserFriends(email,0, 10, "updatedAt", "asc"));
+    }
+
 
 }
