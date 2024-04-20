@@ -1,7 +1,12 @@
 package com.cranker.cranker.unit.user;
 
 import com.cranker.cranker.exception.ResourceNotFoundException;
+import com.cranker.cranker.friendship.Friendship;
+import com.cranker.cranker.friendship.FriendshipDTO;
+import com.cranker.cranker.friendship.FriendshipResponse;
+import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
+import com.cranker.cranker.user.User;
 import com.cranker.cranker.user.UserController;
 import com.cranker.cranker.user.UserService;
 import com.cranker.cranker.user.payload.UserDTO;
@@ -18,6 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -126,5 +133,42 @@ class UserControllerUnitTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updatedUserInfo, response.getBody());
+    }
+
+    @Test
+    void shouldRespondWithOKAndUserFriendList() {
+        String email = "michael@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+        User friend = new User();
+        friend.setId(2L);
+        ProfilePicture profilePicture = new ProfilePicture();
+        profilePicture.setUrl("ur;");
+        friend.setSelectedPic(profilePicture);
+        friend.setFirstName("Friend");
+        friend.setLastName("Friend");
+
+        Friendship friendship = new Friendship(1L, "Active", user, friend, LocalDateTime.now(), LocalDateTime.now());
+        String updatedAtFormatted = friendship.getUpdatedAt().getDayOfMonth() + " " + DateTimeFormatter
+                .ofPattern("MMMM").format(friendship.getUpdatedAt()) + " " + friendship.getUpdatedAt().getYear();
+
+        FriendshipDTO friendshipDTO = new FriendshipDTO(1L, 2L, "Friend Friend", profilePicture.getUrl(),
+                friendship.getStatus(), updatedAtFormatted, friendship.getCreatedAt(), friendship.getUpdatedAt());
+
+
+        FriendshipResponse friendshipResponse = new FriendshipResponse(0, 10 , 1L,
+                1, true, List.of(friendshipDTO));
+
+        when(authentication.getName()).thenReturn(email);
+        when(userService.retrieveUserFriends(email, 0, 10, "updatedAt", "asc"))
+                .thenReturn(friendshipResponse);
+
+        ResponseEntity<FriendshipResponse> response = userController
+                .retrieveUserFriends(authentication, 0, 10, "updatedAt", "asc");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(friendshipResponse, response.getBody());
     }
 }
