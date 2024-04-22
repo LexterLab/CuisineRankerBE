@@ -1,7 +1,7 @@
 INSERT INTO profile_pics (name, url, category_id)
 VALUES
-    ('Rattingam', 'https://i.ibb.co/mbzZL5x/rat1.jpg', (SELECT id FROM profile_pic_categories WHERE name = 'STARTER')),
-    ('Billy', 'https://i.ibb.co/HqxfyS4/male1.png', (SELECT id FROM profile_pic_categories WHERE name = 'STARTER')),
-    ('Jasmine', 'https://i.ibb.co/MVZcQgh/female4.png', (SELECT id FROM profile_pic_categories WHERE name = 'STARTER')),
-    ('William', 'https://i.ibb.co/Hd3bL9r/cat3.png', (SELECT id FROM profile_pic_categories WHERE name = 'STARTER'))
+    ('Rattingam', 'https://bit.ly/49PJgT3', (SELECT id FROM profile_pic_categories WHERE name = 'STARTER')),
+    ('Billy', 'https://bit.ly/49Mo93R', (SELECT id FROM profile_pic_categories WHERE name = 'STARTER')),
+    ('Jasmine', 'https://bit.ly/3WaCGTY', (SELECT id FROM profile_pic_categories WHERE name = 'STARTER')),
+    ('William', 'https://bit.ly/4aJQN7f', (SELECT id FROM profile_pic_categories WHERE name = 'STARTER'))
 ON CONFLICT DO NOTHING;
