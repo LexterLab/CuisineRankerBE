@@ -19,7 +19,9 @@ public interface Messages {
     String EMAIL_NOT_CHANGED = "Please provide a new email";
     String ENABLED_2FA = "User has enabled 2FA, 2FA code was sent to email: ";
     String TOKEN_DONT_MATCH_USER = "Provided token doesn't match the user";
-
+    String UNSUPPORTED_EXTENSION = "Provided extension  is unsupported";
     String NOT_VERIFIED = "You need to verify your email first!";
     String PASSWORDS_DONT_MATCH = "Passwords don't match";
+    String UNSUCCESSFUL_GCS_OPERATION = "Unsuccessful GCS operation";
+    String EMPTY_FILE_NAME = "Empty File Name";
 }
