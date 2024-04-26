@@ -21,4 +21,6 @@ public class Properties {
     private String gcpProjectId;
     @Value("${gcp.bucket.id}")
     private String gcpBucketId;
+    @Value("${recipe.default.pic}")
+    private String defaultRecipePicture;
 }
