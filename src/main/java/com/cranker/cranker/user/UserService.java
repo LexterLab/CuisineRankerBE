@@ -83,6 +83,7 @@ public class UserService {
             }
         }
 
+        logger.info("Retrieving friends for: {}", email);
         return FriendshipMapper.INSTANCE.pageToFriendshipResponse(friendshipPage, friendships);
     }
 }
