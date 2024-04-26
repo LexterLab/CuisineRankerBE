@@ -6,7 +6,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -62,5 +64,23 @@ public class RecipeController {
         return ResponseEntity.noContent().build();
     }
 
-
+    @Operation(
+            summary = "Create personal recipe REST API",
+            description = "Create personal recipe REST API is used to create a user's personal recipe"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "201", description = "Http Status 200 CREATED"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "403", description = "Http Status 403 FORBIDDEN"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("personal")
+    public ResponseEntity<RecipeDTO> createPersonalRecipe(Authentication authentication, @Valid @RequestBody RecipeRequestDTO requestDTO) {
+        return new ResponseEntity<>(recipeService
+                .createPersonalRecipe(authentication.getName(), requestDTO), HttpStatus.CREATED);
+    }
 }
