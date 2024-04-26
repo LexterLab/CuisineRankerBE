@@ -24,4 +24,6 @@ public interface Messages {
     String PASSWORDS_DONT_MATCH = "Passwords don't match";
     String UNSUCCESSFUL_GCS_OPERATION = "Unsuccessful GCS operation";
     String EMPTY_FILE_NAME = "Empty File Name";
+    String RECIPE_EXISTS = "Recipe with this name already exists";
+    String INVALID_INGREDIENT_AMOUNT = "Invalid Ingredient Amount (must be a positive number)";
 }
