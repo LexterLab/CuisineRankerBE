@@ -50,7 +50,7 @@ public class RecipeService {
         User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
 
-        if (recipeRepository.existsByNameAndType(requestDTO.name(), RecipeType.CUSTOM.getName())) {
+        if (recipeRepository.existsByNameAndTypeAndUserId(requestDTO.name(), RecipeType.CUSTOM.getName(), user.getId())) {
             logger.error("Recipe with name {} already exists", requestDTO.name());
             throw new APIException(HttpStatus.CONFLICT, Messages.RECIPE_EXISTS);
         }

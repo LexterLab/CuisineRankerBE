@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     List<Recipe> findAllByUserEmail(String email);
     Optional<Recipe> findByIdAndUserId(Long recipeId, Long userId);
-    boolean existsByNameAndType(String name, String type);
+    boolean existsByNameAndTypeAndUserId(String name, String type, Long userId);
 }
