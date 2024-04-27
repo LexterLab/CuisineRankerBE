@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
@@ -35,12 +36,13 @@ public class DataBucketUtil {
                 .build().getService();
     }
 
+    @Transactional
     public CloudFileDTO uploadFile(MultipartFile multipartFile, String email) {
         try {
 
             String fileName = helper.generateUniqueFileName(multipartFile.getOriginalFilename());
 
-            helper.checkFileExtension(fileName);
+            helper.checkFileExtension(multipartFile.getOriginalFilename());
 
             Blob blob = storage.get(properties.getGcpBucketId()).create(
                     fileName,
