@@ -101,6 +101,41 @@ REST API will start running at <http://localhost:443>
 ```bash
 docker compose down
 ```
+## Setup properties
+
+
+**1. Navigate to resources directory: "src/main/resources"**
+
+**2. Setup gcp-config.json**
+
+Replace the values in the curly brackets with your own google cloud credentials you can find on 
+https://console.cloud.google.com/
+
+```json
+{
+  "type": "service_account",
+  "project_id": "{google_cloud_project_id}",
+  "private_key_id": "{private_key_id}",
+  "private_key": "{private_key}",
+  "client_email": "{client_email}",
+  "client_id": "{client_id}",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "{cert_url}",
+  "universe_domain": "googleapis.com"
+}
+```
+
+
+**3. Setup google cloud properties in *"application.docker.properties"***
+
+Replace values with your own google cloud credentials
+
+```properties
+spring.cloud.gcp.project-id=cuisine-ranker
+gcp.bucket.id=cuisine-media
+```
 
 ## Endpoints
 + http://localhost:443/swagger-ui/index.html - Every endpoint is documented here.
