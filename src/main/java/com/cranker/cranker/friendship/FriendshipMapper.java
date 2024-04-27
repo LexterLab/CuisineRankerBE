@@ -12,9 +12,9 @@ import java.util.List;
 public interface FriendshipMapper {
     FriendshipMapper INSTANCE = Mappers.getMapper(FriendshipMapper.class);
 
-    @Mapping(target = "friendId", expression = "java(friendship.getFriend().getId())")
-    @Mapping(target = "friendName", expression = "java(friendship.getFriend().getFirstName() + ' ' + friendship.getFriend().getLastName())")
-    @Mapping(target = "friendImage", expression =  "java(friendship.getFriend().getSelectedPic().getUrl())")
+    @Mapping(target = "friendId", expression = "java(friendship.getUser().getId())")
+    @Mapping(target = "friendName", expression = "java(friendship.getUser().getFirstName() + ' ' + friendship.getFriend().getLastName())")
+    @Mapping(target = "friendImage", expression =  "java(friendship.getUser().getSelectedPic().getUrl())")
     @Mapping(target = "updatedAtFormatted", expression = "java(friendship.getUpdatedAt().getDayOfMonth() + \" \" + java.time.format.DateTimeFormatter.ofPattern(\"MMMM\").format(friendship.getUpdatedAt()) + \" \" + friendship.getUpdatedAt().getYear())")
     FriendshipDTO friendshipToFriendshipDTOFriendVersion(Friendship friendship);
 

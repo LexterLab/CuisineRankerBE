@@ -15,4 +15,12 @@ public class Properties {
     private String resetURL;
     @Value("${change.email.url}")
     private String changeEmailURL;
+    @Value("${gcp.config.file}")
+    private String gcpConfigFile;
+    @Value("${spring.cloud.gcp.project-id}")
+    private String gcpProjectId;
+    @Value("${gcp.bucket.id}")
+    private String gcpBucketId;
+    @Value("${recipe.default.pic}")
+    private String defaultRecipePicture;
 }
