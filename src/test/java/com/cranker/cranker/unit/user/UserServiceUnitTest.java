@@ -203,8 +203,6 @@ public class UserServiceUnitTest {
 
         Sort sort = Sort.by(sortBy).ascending();
 
-
-
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 
         Page<Friendship> friendshipPage = new PageImpl<>(List.of(friendship), pageable, 1);
