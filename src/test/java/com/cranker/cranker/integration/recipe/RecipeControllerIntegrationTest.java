@@ -62,7 +62,7 @@ public class RecipeControllerIntegrationTest {
     @Test
     @WithMockUser(username = "user@gmail.com", roles = "USER")
     void shouldRespondWithNotFoundWhenProvidedUnExistingIdDeletingPersonalRecipe() throws Exception {
-        mockMvc.perform(delete("/api/v1/recipes/personal/2"))
+        mockMvc.perform(delete("/api/v1/recipes/personal/23"))
                 .andExpect(status().isNotFound());
     }
 }
