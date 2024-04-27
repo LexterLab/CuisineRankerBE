@@ -115,7 +115,7 @@ public class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.email").value("user@gmail.com"))
                 .andExpect(jsonPath("$.isVerified").value(true))
                 .andExpect(jsonPath("$.isTwoFactorEnabled").value(false))
-                .andExpect(jsonPath("$.profilePicURL").value("https://i.ibb.co/mbzZL5x/rat1.jpg"));
+                .andExpect(jsonPath("$.profilePicURL").value("https://storage.googleapis.com/cuisine-media/profile-icons/rat1.jpg"));
 
     }
 
