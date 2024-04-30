@@ -16,6 +16,7 @@ public record RecipeRequestDTO (
         String name,
         @Schema(example = "1.Slice up some onions. 2. Slice up some carrots etc")
         @NotEmpty(message = "Please input recipe preparation steps")
+        @Size(min = 10, max = 1000, message = "Preparation should be between 10 and 1000 characters long")
         String preparation,
         @URL
         @Schema(example = "https://storage.googleapis.com/cuisine-media/defaults/dishes4.png")
