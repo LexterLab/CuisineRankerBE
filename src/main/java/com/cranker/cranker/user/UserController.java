@@ -1,5 +1,6 @@
 package com.cranker.cranker.user;
 
+import com.cranker.cranker.friendship.FriendshipResponse;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
@@ -98,6 +99,30 @@ public class UserController {
     public ResponseEntity<UserDTO> changeUserProfilePicture(Authentication authentication,
                                                                    @PathVariable Long pictureId) {
         return ResponseEntity.ok(service.changeUserProfilePicture(authentication.getName(), pictureId));
+    }
+
+    @Operation(
+            summary = "Get authenticated user's friends REST API",
+            description = "Get authenticated user's friends REST API is used to retrieve pageable version of user's friends"
+    )
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "200", description = "Http Status 200 SUCCESS"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("friends")
+    public ResponseEntity<FriendshipResponse> retrieveUserFriends(
+            Authentication authentication,
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "updatedAt", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir
+    ) {
+        return ResponseEntity.ok(service.retrieveUserFriends(authentication.getName(), pageNo, pageSize, sortBy, sortDir));
     }
 
 }

@@ -140,4 +140,7 @@ gcp.bucket.id=cuisine-media
 ## Endpoints
 + http://localhost:443/swagger-ui/index.html - Every endpoint is documented here.
 
+
 ![swagger](https://i.ibb.co/pRCtGHw/swagger.jpg)
+=======
+

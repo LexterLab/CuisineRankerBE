@@ -13,5 +13,7 @@ public interface RecipeMapper {
     @Mapping(expression = "java(recipe.getPrepTimeInMinutes() + recipe.getCookTimeInMinutes())", target = "totalTime")
     RecipeDTO entityToDTO(Recipe recipe);
 
+    Recipe requestDTOToEntity(RecipeRequestDTO requestDTO);
+
     List<RecipeDTO> entityToDTO(Iterable<Recipe> recipes);
 }

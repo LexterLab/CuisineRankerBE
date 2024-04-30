@@ -4,6 +4,7 @@ import com.cranker.cranker.authentication.jwt.JWTAuthenticationResponse;
 import com.cranker.cranker.authentication.jwt.JwtRefreshRequestDTO;
 import com.cranker.cranker.authentication.payload.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -223,6 +224,21 @@ public class AuthenticationController {
     @PatchMapping("two-factor/confirm")
     public ResponseEntity<Void> confirmTwoFactorCode(@Valid @RequestBody TwoFactorRequestDTO requestDTO, Authentication authentication) {
         authenticationService.confirmTwoFactorAuthentication(requestDTO, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Resend email confirmation REST API",
+            description = "Resends email confirmation"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "204", description = "Http Status 204 NO CONTENT"),
+            @ApiResponse( responseCode = "400", description = "Http Status 400 BAD REQUEST"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @PostMapping("confirm-email/resend")
+    public ResponseEntity<Void> resendEmailConfirmation(@Schema(example = "user@gmail.com") @RequestParam String email) throws MessagingException {
+        authenticationService.requestResendConfirmationEmail(email);
         return ResponseEntity.noContent().build();
     }
 }

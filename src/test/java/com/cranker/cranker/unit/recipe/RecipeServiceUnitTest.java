@@ -1,6 +1,9 @@
 package com.cranker.cranker.unit.recipe;
 
+import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
+import com.cranker.cranker.ingredient.Ingredient;
+import com.cranker.cranker.ingredient.IngredientRepository;
 import com.cranker.cranker.recipe.*;
 import com.cranker.cranker.user.User;
 import com.cranker.cranker.user.UserRepository;
@@ -12,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,9 +27,11 @@ public class RecipeServiceUnitTest {
     private RecipeRepository recipeRepository;
     @Mock
     private UserRepository userRepository;
-
+    @Mock
+    private IngredientRepository ingredientRepository;
     @InjectMocks
     private RecipeService recipeService;
+
 
     @Test
     void shouldRetrieveAllRecipesMadeByUser() {
@@ -108,4 +114,152 @@ public class RecipeServiceUnitTest {
                 .deletePersonalRecipe(userEmail, unExistingRecipeId));
     }
 
+    @Test
+    void shouldCreatePersonalRecipe() {
+        String userEmail = "user@example.com";
+        Long ingredientId = 1L;
+        double amount = 1.0;
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(userEmail);
+        Ingredient ingredient = new Ingredient();
+        ingredient.setId(ingredientId);
+
+        RecipeRequestDTO requestDTO = new RecipeRequestDTO
+                (
+                        "Fried Chicken", "Preparation", "url",
+                        1, 1, Map.of(ingredientId, amount)
+                );
+
+        Recipe newRecipe = new Recipe();
+        newRecipe.setUser(user);
+        newRecipe.setId(1L);
+        newRecipe.setType(RecipeType.CUSTOM);
+        newRecipe.setName(requestDTO.name());
+        newRecipe.setPreparation(requestDTO.preparation());
+        newRecipe.setCookTimeInMinutes(requestDTO.cookTimeInMinutes());
+        newRecipe.setPrepTimeInMinutes(requestDTO.prepTimeInMinutes());
+        newRecipe.setTotalTimeInMinutes(2);
+        newRecipe.setPictureURL(requestDTO.pictureURL());
+
+        RecipeDTO recipeDTO = new RecipeDTO
+                (
+                        newRecipe.getId(), newRecipe.getName(), newRecipe.getPictureURL(), newRecipe.getPreparation(),
+                        newRecipe.getType(), newRecipe.getPrepTimeInMinutes(), newRecipe.getCookTimeInMinutes(),
+                        newRecipe.getTotalTimeInMinutes(), newRecipe.getCreatedAt(), newRecipe.getUpdatedAt()
+                );
+
+        when(userRepository.findUserByEmailIgnoreCase(userEmail)).thenReturn(Optional.of(user));
+        when(recipeRepository.existsByNameAndTypeAndUserId(requestDTO.name(), RecipeType.CUSTOM.getName(), user.getId()))
+                .thenReturn(false);
+        when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.of(ingredient));
+        when(recipeRepository.save(any(Recipe.class))).thenReturn(newRecipe);
+
+        RecipeDTO createdRecipe = recipeService.createPersonalRecipe(userEmail, requestDTO);
+
+        assertEquals(recipeDTO, createdRecipe);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenCreatingPersonalRecipeWithUnexistingUser() {
+        String userEmail = "unexisting@example.com";
+        User user = new User();
+        Long ingredientId = 1L;
+        double amount = 1.0;
+
+        RecipeRequestDTO requestDTO = new RecipeRequestDTO
+                (
+                        "Fried Chicken", "Preparation", "url",
+                        1, 1, Map.of(ingredientId, amount)
+                );
+
+
+
+        when(userRepository.findUserByEmailIgnoreCase(userEmail)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> recipeService
+                .createPersonalRecipe(userEmail, requestDTO));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenCreatingPersonalRecipeWithUnexistingIngredient() {
+        String userEmail = "user@example.com";
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(userEmail);
+        Long ingredientId = 1L;
+        double amount = 1.0;
+
+        RecipeRequestDTO requestDTO = new RecipeRequestDTO
+                (
+                        "Fried Chicken", "Preparation", "url",
+                        1, 1, Map.of(ingredientId, amount)
+                );
+
+        Recipe newRecipe = new Recipe();
+        newRecipe.setUser(user);
+        newRecipe.setId(1L);
+        newRecipe.setType(RecipeType.CUSTOM);
+        newRecipe.setName(requestDTO.name());
+        newRecipe.setPreparation(requestDTO.preparation());
+        newRecipe.setCookTimeInMinutes(requestDTO.cookTimeInMinutes());
+        newRecipe.setPrepTimeInMinutes(requestDTO.prepTimeInMinutes());
+        newRecipe.setTotalTimeInMinutes(2);
+        newRecipe.setPictureURL(requestDTO.pictureURL());
+
+        when(userRepository.findUserByEmailIgnoreCase(userEmail)).thenReturn(Optional.of(user));
+        when(recipeRepository.existsByNameAndTypeAndUserId(requestDTO.name(), RecipeType.CUSTOM.getName(), user.getId()))
+                .thenReturn(false);
+        when(ingredientRepository.findById(ingredientId)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> recipeService.createPersonalRecipe(userEmail, requestDTO));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenProvidedExistingPersonalRecipe() {
+        String userEmail = "user@example.com";
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(userEmail);
+        Long ingredientId = 1L;
+        double amount = 1.0;
+
+        RecipeRequestDTO requestDTO = new RecipeRequestDTO
+                (
+                        "Fried Chicken", "Preparation", "url",
+                        1, 1, Map.of(ingredientId, amount)
+                );
+
+        when(userRepository.findUserByEmailIgnoreCase(userEmail)).thenReturn(Optional.of(user));
+        when(recipeRepository.existsByNameAndTypeAndUserId(requestDTO.name(), RecipeType.CUSTOM.getName(), user.getId()))
+                .thenReturn(true);
+
+        assertThrows(APIException.class, () -> recipeService.createPersonalRecipe(userEmail, requestDTO));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenProvidedInvalidIngredientAmount() {
+        String userEmail = "user@example.com";
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(userEmail);
+        Long ingredientId = 1L;
+        double amount = -1;
+
+        RecipeRequestDTO requestDTO = new RecipeRequestDTO
+                (
+                        "Fried Chicken", "Preparation", "url",
+                        1, 1, Map.of(ingredientId, amount)
+                );
+        Ingredient ingredient = new Ingredient();
+        ingredient.setId(ingredientId);
+
+        when(userRepository.findUserByEmailIgnoreCase(userEmail)).thenReturn(Optional.of(user));
+        when(recipeRepository.existsByNameAndTypeAndUserId(requestDTO.name(), RecipeType.CUSTOM.getName(), user.getId()))
+                .thenReturn(false);
+        when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.of(ingredient));
+
+        assertThrows(APIException.class, () -> recipeService.createPersonalRecipe(userEmail, requestDTO));
+    }
 }
+

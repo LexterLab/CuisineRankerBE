@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -93,6 +94,43 @@ public class RecipeControllerUnitTest {
         ResponseEntity<Void> response = recipeController.deleteUserPersonalRecipe(recipeId, authentication);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    void shouldRespondWithCreatedAndRecipe() {
+        String userEmail = "user@example.com";
+        long ingredientId = 1L;
+        double amount = 1.0;
+        RecipeRequestDTO requestDTO = new RecipeRequestDTO
+                (
+                        "Fried Chicken", "Preparation", "url",
+                        1, 1, Map.of(ingredientId, amount)
+                );
+
+        Recipe newRecipe = new Recipe();
+        newRecipe.setId(1L);
+        newRecipe.setType(RecipeType.CUSTOM);
+        newRecipe.setName(requestDTO.name());
+        newRecipe.setPreparation(requestDTO.preparation());
+        newRecipe.setCookTimeInMinutes(requestDTO.cookTimeInMinutes());
+        newRecipe.setPrepTimeInMinutes(requestDTO.prepTimeInMinutes());
+        newRecipe.setTotalTimeInMinutes(2);
+        newRecipe.setPictureURL(requestDTO.pictureURL());
+
+        RecipeDTO recipeDTO = new RecipeDTO
+                (
+                        newRecipe.getId(), newRecipe.getName(), newRecipe.getPictureURL(), newRecipe.getPreparation(),
+                        newRecipe.getType(), newRecipe.getPrepTimeInMinutes(), newRecipe.getCookTimeInMinutes(),
+                        newRecipe.getTotalTimeInMinutes(), newRecipe.getCreatedAt(), newRecipe.getUpdatedAt()
+                );
+
+        when(authentication.getName()).thenReturn(userEmail);
+        when(recipeService.createPersonalRecipe(userEmail, requestDTO)).thenReturn(recipeDTO);
+
+        ResponseEntity<RecipeDTO> response = recipeController.createPersonalRecipe(authentication, requestDTO);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(recipeDTO, response.getBody());
     }
 
 }

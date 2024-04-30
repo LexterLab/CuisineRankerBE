@@ -100,4 +100,16 @@ public class EmailSender {
         helper.setSubject("Two-factor Authentication");
         sender.send(message);
     }
+
+    public void sendEmailConfirmationResend(User user, String confirmationLink) throws MessagingException {
+        Context context = new Context(Locale.ENGLISH, Map.of("firstName", user.getFirstName(),
+                "link", confirmationLink));
+        MimeMessage message = sender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+        helper.setFrom(properties.getEmailSender());
+        helper.setText(engine.process("resent-email-confirmation", context), true);
+        helper.setTo(user.getEmail());
+        helper.setSubject("Resent Email Confirmation");
+        sender.send(message);
+    }
 }

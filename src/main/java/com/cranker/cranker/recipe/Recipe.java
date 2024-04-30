@@ -3,6 +3,7 @@ package com.cranker.cranker.recipe;
 import com.cranker.cranker.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -21,7 +22,7 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
@@ -31,6 +32,7 @@ public class Recipe {
     @Setter(AccessLevel.NONE)
     private String type;
 
+    @Column(name = "picture_url")
     private String pictureURL;
 
     @Column(nullable = false)

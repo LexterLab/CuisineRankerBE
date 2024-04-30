@@ -200,6 +200,7 @@ public class AuthenticationService {
                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
 
        if (!user.getIsVerified()) {
+           logger.error(Messages.NOT_VERIFIED + ": {}", email);
            throw new APIException(HttpStatus.BAD_REQUEST, Messages.NOT_VERIFIED);
        }
 
@@ -219,9 +220,27 @@ public class AuthenticationService {
         User tokenUser = twoFactorTokenService.getUserByToken(requestDTO.token());
 
         if (!user.getEmail().equals(tokenUser.getEmail())) {
+            logger.error(Messages.TOKEN_DONT_MATCH_USER + ": {}", email);
             throw new APIException(HttpStatus.UNAUTHORIZED, Messages.TOKEN_DONT_MATCH_USER);
         }
 
         twoFactorTokenService.confirmToken(requestDTO.token());
+        logger.info("Successfully confirmed 2FA token for user: {}", email);
+    }
+
+    @Transactional
+    public void requestResendConfirmationEmail(String email) throws MessagingException {
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+        if (user.getIsVerified()) {
+            logger.error(Messages.EMAIL_ALREADY_CONFIRMED + ": {}", email);
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_ALREADY_CONFIRMED);
+        }
+
+        String code = emailConfirmationTokenService.generateToken(user);
+        String confirmationURL = properties.getEmailURL() + code;
+        emailService.sendEmailConfirmationResend(user, confirmationURL);
+        logger.info("Account confirmation email successfully resent to: {}", user.getEmail());
     }
 }

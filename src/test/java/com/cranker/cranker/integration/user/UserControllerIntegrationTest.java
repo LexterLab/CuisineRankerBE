@@ -115,7 +115,7 @@ public class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.email").value("user@gmail.com"))
                 .andExpect(jsonPath("$.isVerified").value(true))
                 .andExpect(jsonPath("$.isTwoFactorEnabled").value(false))
-                .andExpect(jsonPath("$.profilePicURL").value("https://cdn.discordapp.com/attachments/1220059971534852221/1220060006528057394/rat1.jpg?ex=660d906d&is=65fb1b6d&hm=bff4ad0ad1e3a136d16de37a86515e29b61cf8600cc974ce2b5ae72ba9834051&"));
+                .andExpect(jsonPath("$.profilePicURL").value("https://storage.googleapis.com/cuisine-media/profile-icons/rat1.jpg"));
 
     }
 
@@ -125,5 +125,28 @@ public class UserControllerIntegrationTest {
         long pictureId = 0L;
         mockMvc.perform(patch("/api/v1/users/pictures/" + pictureId))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithOKAndUserFriendList() throws Exception {
+        mockMvc.perform(get("/api/v1/users/friends"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.friendships").isArray())
+                .andExpect(jsonPath("$.friendships").isNotEmpty());
+    }
+
+    @Test
+    @WithMockUser(username = "user2@gmail.com", roles = "USER")
+    void shouldRespondWithNotFoundWhenRetrievingUserFriendListWithUnexistingUser() throws Exception {
+        mockMvc.perform(get("/api/v1/users/friends"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenRetrievingUserFriendListWithoutBeingSignedIn() throws Exception {
+        mockMvc.perform(get("/api/v1/users/friends"))
+                .andExpect(status().isForbidden());
     }
 }
