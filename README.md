@@ -137,6 +137,21 @@ spring.cloud.gcp.project-id=cuisine-ranker
 gcp.bucket.id=cuisine-media
 ```
 
+## Database Management
+You can manage your database via 2 ways:
+
+**1. Managing your databse through docker postgreSQL image command line:**
+
+```bash
+ psql -U postgres -d mydb
+```
+
+**2. Or through pgAdmin docker image, by visiting in your browser: http://localhost:5050/browser/**
+
+## SMTP
+
+SMTP image is already setup and to see sent emails, you can just use maildev, by visiting in your browser: http://localhost:1080/#/
+
 ## Endpoints
 + http://localhost:443/swagger-ui/index.html - Every endpoint is documented here.
 
