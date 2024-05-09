@@ -3,6 +3,7 @@ package com.cranker.cranker.user;
 import com.cranker.cranker.friendship.FriendshipDTO;
 import com.cranker.cranker.friendship.FriendshipResponse;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
+import com.cranker.cranker.token.payload.TokenDTO;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
 import com.cranker.cranker.user.payload.UserResponse;
@@ -269,4 +270,43 @@ public class UserController {
 
         return ResponseEntity.ok(service.searchUsers(authentication.getName(), name, pageNo, pageSize, sortBy, sortDir));
     }
+
+
+    @Operation(
+            summary = "Generate Friendship token REST API",
+            description = "Generate Friendship token REST API is used to generate token for adding friends"
+    )
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "201", description = "Http Status 201 CREATED"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("friends/token")
+    public ResponseEntity<TokenDTO> generateFriendshipToken(Authentication authentication) {
+        return new ResponseEntity<>(service.generateFriendshipToken(authentication.getName()), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Activate Friendship token REST API",
+            description = "Activate Friendship token REST API is used to activate token for adding friends"
+    )
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "200", description = "Http Status 200 SUCCESS"),
+            @ApiResponse( responseCode = "400", description = "Http Status 400 BAD REQUEST"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @PreAuthorize("hasRole('USER')")
+    @PatchMapping("friends/token")
+    public ResponseEntity<FriendshipDTO> activateFriendshipToken(Authentication authentication, TokenDTO tokenDTO) {
+        return ResponseEntity.ok(service.addFriendViaToken(authentication.getName(), tokenDTO));
+    }
+
 }
