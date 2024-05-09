@@ -5,6 +5,7 @@ import com.cranker.cranker.friendship.FriendshipResponse;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
+import com.cranker.cranker.user.payload.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -231,7 +232,7 @@ public class UserController {
             @ApiResponse( responseCode = "204", description = "Http Status 200 NO CONTENT"),
             @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
             @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND"),
-            @ApiResponse( responseCode = "409", description = "Http Status 409 CONFLICT")
+            @ApiResponse( responseCode = "409", description = "Http Status 409 CONFLICT"),
     })
     @PreAuthorize("hasRole('USER')")
     @DeleteMapping("friends/{friendshipId}/reject")
@@ -241,5 +242,31 @@ public class UserController {
                     @PathVariable Long friendshipId) {
         service.rejectFriendRequest(authentication.getName(), friendshipId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Search users REST API",
+            description = "Search users REST API is used to search users by name"
+    )
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "200", description = "Http Status 200 OK"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("search")
+    public ResponseEntity<UserResponse> searchUsers(
+            Authentication authentication,
+            @Schema(example = "user")
+            @RequestParam(required = false) String name,
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir) {
+
+        return ResponseEntity.ok(service.searchUsers(authentication.getName(), name, pageNo, pageSize, sortBy, sortDir));
     }
 }
