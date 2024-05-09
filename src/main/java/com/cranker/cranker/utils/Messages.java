@@ -31,4 +31,5 @@ public interface Messages {
     String FRIENDSHIP_BLOCKED = "User has been blocked";
     String FRIENDSHIP_USER_DONT_MATCH = "User doesn't match friendship request";
     String FRIENDSHIP_REQUEST_NOT_PENDING = "Friendship request is not pending";
+    String ADDING_YOURSELF_AS_FRIEND = "You cannot add yourself as a friend";
 }
