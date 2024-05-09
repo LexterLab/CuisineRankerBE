@@ -9,7 +9,9 @@ import com.cranker.cranker.profile_pic.payload.PictureMapper;
 import com.cranker.cranker.profile_pic.repository.ProfilePictureRepository;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
+import com.cranker.cranker.user.payload.UserResponse;
 import com.cranker.cranker.utils.Messages;
+import com.cranker.cranker.utils.PageableUtil;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,37 +26,38 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class UserService {
-    private final UserRepository repository;
+    private final UserRepository userRepository;
     private final ProfilePictureRepository pictureRepository;
     private final Logger logger = LogManager.getLogger(this);
     private final FriendshipRepository friendshipRepository;
     private final FriendshipHelper friendshipHelper;
+    private final PageableUtil pageableUtil;
 
     public UserDTO retrieveUserInfo(String email) {
-        User user = repository.findUserByEmailIgnoreCase(email)
+        User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
         logger.info("Retrieving user info for User: {}", user.getEmail());
         return UserResponseMapper.INSTANCE.entityToDTO(user);
     }
 
     public UserRequestDTO changeUserPersonalInfo(String email, UserRequestDTO requestDTO) {
-        User user = repository.findUserByEmailIgnoreCase(email)
+        User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         UserResponseMapper.INSTANCE.updateUserFromDto(requestDTO, user);
         logger.info("Updating User's personal info for User: {}", user.getEmail());
-        return UserResponseMapper.INSTANCE.entityToRequestDTO(repository.save(user));
+        return UserResponseMapper.INSTANCE.entityToRequestDTO(userRepository.save(user));
     }
 
     public List<PictureDTO> retrieveUserProfilePictures(String email) {
-        User user = repository.findUserByEmailIgnoreCase(email)
+        User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
         logger.info("Retrieving user profile pictures for: {}", email);
         return PictureMapper.INSTANCE.entityToDTO(user.getProfilePictures());
     }
 
     public UserDTO changeUserProfilePicture(String email, Long pictureId) {
-        User user = repository.findUserByEmailIgnoreCase(email)
+        User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         ProfilePicture picture = pictureRepository.findById(pictureId)
@@ -62,14 +65,14 @@ public class UserService {
 
         user.setSelectedPic(picture);
         logger.info("Set  profile picture: {} for user: {}", picture.getName(),  email);
-        return UserResponseMapper.INSTANCE.entityToDTO(repository.save(user));
+        return UserResponseMapper.INSTANCE.entityToDTO(userRepository.save(user));
     }
 
     public FriendshipResponse retrieveUserFriends(String email, int pageNo, int pageSize, String sortBy, String sortDir) {
-        User user = repository.findUserByEmailIgnoreCase(email)
+        User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
-        Pageable pageable = friendshipHelper.getFriendshipPageable(pageNo, pageSize, sortBy, sortDir);
+        Pageable pageable = pageableUtil.getPageable(pageNo, pageSize, sortBy, sortDir);
         Page<Friendship> friendshipPage = friendshipRepository.findAllFriendsByUserId(user.getId(), pageable);
 
         List<FriendshipDTO> friendships = new ArrayList<>();
@@ -87,10 +90,10 @@ public class UserService {
     }
 
     public FriendshipDTO sendFriendRequest(String userEmail, Long friendId) {
-        User user = repository.findUserByEmailIgnoreCase(userEmail)
+        User user = userRepository.findUserByEmailIgnoreCase(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
 
-        User friend = repository.findById(friendId)
+        User friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new ResourceNotFoundException("Friend", "Id", friendId));
 
         if (friendshipRepository.friendshipExists(user.getId(), friendId, FriendshipStatus.PENDING.getName())) {
@@ -115,10 +118,10 @@ public class UserService {
     }
 
     public FriendshipResponse retrieveUserFriendshipRequests(String email, int pageNo, int pageSize, String sortBy, String sortDir) {
-        User user = repository.findUserByEmailIgnoreCase(email)
+        User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
-        Pageable pageable = friendshipHelper.getFriendshipPageable(pageNo, pageSize, sortBy, sortDir);
+        Pageable pageable = pageableUtil.getPageable(pageNo, pageSize, sortBy, sortDir);
         Page<Friendship> friendshipPage = friendshipRepository.findAllFriendRequests(user.getId(), pageable);
 
         List<FriendshipDTO> friendships = new ArrayList<>();
@@ -132,10 +135,10 @@ public class UserService {
     }
 
     public FriendshipResponse retrieveUserSentFriendshipRequests(String email, int pageNo, int pageSize, String sortBy, String sortDir) {
-        User user = repository.findUserByEmailIgnoreCase(email)
+        User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
-        Pageable pageable = friendshipHelper.getFriendshipPageable(pageNo, pageSize, sortBy, sortDir);
+        Pageable pageable = pageableUtil.getPageable(pageNo, pageSize, sortBy, sortDir);
         Page<Friendship> friendshipPage = friendshipRepository.findAllSentFriendRequests(user.getId(), pageable);
 
         List<FriendshipDTO> friendships = new ArrayList<>();
@@ -149,7 +152,7 @@ public class UserService {
     }
 
     public FriendshipDTO acceptFriendRequest(String email, Long friendshipId) {
-        User user = repository.findUserByEmailIgnoreCase(email)
+        User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         Friendship friendship = friendshipRepository.findById(friendshipId)
@@ -163,7 +166,7 @@ public class UserService {
     }
 
     public void rejectFriendRequest(String email, Long friendshipId) {
-        User user = repository.findUserByEmailIgnoreCase(email)
+        User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         Friendship friendship = friendshipRepository.findById(friendshipId)
@@ -171,7 +174,19 @@ public class UserService {
 
         friendshipHelper.validatePendingFriendshipRequest(user, friendship, friendshipId);
 
-         friendshipRepository.delete(friendship);
-         logger.info("User: {} rejected friendship request: {}", user.getId(), friendshipId);
+        friendshipRepository.delete(friendship);
+        logger.info("User: {} rejected friendship request: {}", user.getId(), friendshipId);
+    }
+
+    public UserResponse searchUsers(String email, String query, int pageNo, int pageSize, String sortBy, String sortDir) {
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        Pageable pageable = pageableUtil.getPageable(pageNo, pageSize, sortBy, sortDir);
+
+        Page<User> userPage = userRepository.findAllByNameAndNotFriends(query, user, pageable);
+
+        return UserResponseMapper.INSTANCE.pageToUserResponse(userPage, UserResponseMapper.INSTANCE
+                .entityToDTO(userPage.getContent()));
     }
 }
