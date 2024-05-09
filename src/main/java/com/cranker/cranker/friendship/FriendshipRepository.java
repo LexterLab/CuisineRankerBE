@@ -16,7 +16,11 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
             "AND ((f.user.id = :id AND f.friend.id = :friendId) OR (f.user.id = :friendId AND f.friend.id = :id)) ")
     boolean friendshipExists(Long id, Long friendId, String status);
 
-    @Query("SELECT f FROM Friendship f WHERE  f.friend.id = :id " +
+    @Query("SELECT f FROM Friendship f WHERE f.friend.id = :id " +
             "AND f.status = 'Pending' ")
     Page<Friendship> findAllFriendRequests(Long id, Pageable pageable);
+
+    @Query("SELECT f FROM Friendship f WHERE f.user.id = :id " +
+            "AND f.status = 'Pending' ")
+    Page<Friendship> findAllSentFriendRequests(Long id, Pageable pageable);
 }
