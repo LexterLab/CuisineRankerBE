@@ -5,6 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Optional;
+
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     @Query("SELECT f FROM Friendship f " +
             "WHERE (f.user.id = :id OR f.friend.id = :id) " +
@@ -23,4 +25,6 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     @Query("SELECT f FROM Friendship f WHERE f.user.id = :id " +
             "AND f.status = 'Pending' ")
     Page<Friendship> findAllSentFriendRequests(Long id, Pageable pageable);
+
+    Optional<Friendship> findByUserIdAndFriendId(Long id, Long friendId);
 }
