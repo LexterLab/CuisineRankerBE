@@ -7,6 +7,8 @@ import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
 import com.cranker.cranker.profile_pic.payload.PictureMapper;
 import com.cranker.cranker.profile_pic.repository.ProfilePictureRepository;
+import com.cranker.cranker.token.TokenService;
+import com.cranker.cranker.token.payload.TokenDTO;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
 import com.cranker.cranker.user.payload.UserResponse;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +35,7 @@ public class UserService {
     private final FriendshipRepository friendshipRepository;
     private final FriendshipHelper friendshipHelper;
     private final PageableUtil pageableUtil;
+    private final TokenService friendshipTokenService;
 
     public UserDTO retrieveUserInfo(String email) {
         User user = userRepository.findUserByEmailIgnoreCase(email)
@@ -89,6 +93,7 @@ public class UserService {
         return FriendshipMapper.INSTANCE.pageToFriendshipResponse(friendshipPage, friendships);
     }
 
+    @Transactional
     public FriendshipDTO sendFriendRequest(String userEmail, Long friendId) {
         User user = userRepository.findUserByEmailIgnoreCase(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
@@ -99,13 +104,8 @@ public class UserService {
         if (friendshipRepository.friendshipExists(user.getId(), friendId, FriendshipStatus.PENDING.getName())) {
             logger.error("Friendship requests already exists for user: {} and friend: {}", userEmail, friendId);
             throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_ALREADY_PENDING);
-        } else if (friendshipRepository.friendshipExists(user.getId(), friendId, FriendshipStatus.ACTIVE.getName())) {
-            logger.error("Friendship  already exists for user: {} and friend: {}", userEmail, friendId);
-            throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_ALREADY_ACTIVE);
-        } else if (friendshipRepository.friendshipExists(user.getId(), friendId, FriendshipStatus.BLOCKED.getName())) {
-            logger.error("User : {} blocked by: {}", userEmail, friendId);
-            throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_BLOCKED);
         }
+        friendshipHelper.validateFriendshipRequest(user.getId(), friendId, userEmail);
 
         Friendship friendship = new Friendship();
         friendship.setUser(user);
@@ -151,6 +151,7 @@ public class UserService {
         return FriendshipMapper.INSTANCE.pageToFriendshipResponse(friendshipPage, friendships);
     }
 
+    @Transactional
     public FriendshipDTO acceptFriendRequest(String email, Long friendshipId) {
         User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
@@ -165,6 +166,7 @@ public class UserService {
         return FriendshipMapper.INSTANCE.friendshipToFriendshipDTOFriendVersion(friendshipRepository.save(friendship));
     }
 
+    @Transactional
     public void rejectFriendRequest(String email, Long friendshipId) {
         User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
@@ -189,4 +191,48 @@ public class UserService {
         return UserResponseMapper.INSTANCE.pageToUserResponse(userPage, UserResponseMapper.INSTANCE
                 .entityToDTO(userPage.getContent()));
     }
+
+   @Transactional
+   public TokenDTO generateFriendshipToken(String email) {
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        String friendshipToken = friendshipTokenService.generateToken(user);
+
+        return new TokenDTO(friendshipToken);
+    }
+
+    @Transactional
+    public FriendshipDTO addFriendViaToken(String email, TokenDTO tokenDTO) {
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        friendshipTokenService.confirmToken(tokenDTO.value());
+
+        User friend = friendshipTokenService.getUserByToken(tokenDTO.value());
+
+        if (friend.getId().equals(user.getId())) {
+            throw new APIException(HttpStatus.BAD_REQUEST, Messages.ADDING_YOURSELF_AS_FRIEND);
+        }
+
+        long friendId = friend.getId();
+
+        if (friendshipRepository.friendshipExists(user.getId(), friendId, FriendshipStatus.PENDING.getName())) {
+            Friendship friendship = friendshipRepository.findByUserIdAndFriendId(user.getId(), friendId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Friendship", "Id", friendId));
+            friendship.setFriendshipStatus(FriendshipStatus.ACTIVE);
+            logger.info("Pending friend request detected {}, changed to active", friendship.getId());
+            return FriendshipMapper.INSTANCE.friendshipToFriendshipDTOUserVersion(friendshipRepository.save(friendship));
+        }
+        friendshipHelper.validateFriendshipRequest(user.getId(), friendId, email);
+
+        Friendship friendship = new Friendship();
+        friendship.setUser(user);
+        friendship.setFriend(friend);
+        friendship.setFriendshipStatus(FriendshipStatus.ACTIVE);
+
+        return FriendshipMapper.INSTANCE.friendshipToFriendshipDTOUserVersion(friendshipRepository.save(friendship));
+    }
+
+
 }
