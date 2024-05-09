@@ -1,5 +1,6 @@
 package com.cranker.cranker.user;
 
+import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.friendship.*;
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
@@ -8,13 +9,13 @@ import com.cranker.cranker.profile_pic.payload.PictureMapper;
 import com.cranker.cranker.profile_pic.repository.ProfilePictureRepository;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
+import com.cranker.cranker.utils.Messages;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class UserService {
     private final ProfilePictureRepository pictureRepository;
     private final Logger logger = LogManager.getLogger(this);
     private final FriendshipRepository friendshipRepository;
+    private final FriendshipHelper friendshipHelper;
 
     public UserDTO retrieveUserInfo(String email) {
         User user = repository.findUserByEmailIgnoreCase(email)
@@ -67,10 +69,7 @@ public class UserService {
         User user = repository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+        Pageable pageable = friendshipHelper.getFriendshipPageable(pageNo, pageSize, sortBy, sortDir);
         Page<Friendship> friendshipPage = friendshipRepository.findAllFriendsByUserId(user.getId(), pageable);
 
         List<FriendshipDTO> friendships = new ArrayList<>();
@@ -85,5 +84,94 @@ public class UserService {
 
         logger.info("Retrieving friends for: {}", email);
         return FriendshipMapper.INSTANCE.pageToFriendshipResponse(friendshipPage, friendships);
+    }
+
+    public FriendshipDTO sendFriendRequest(String userEmail, Long friendId) {
+        User user = repository.findUserByEmailIgnoreCase(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
+
+        User friend = repository.findById(friendId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friend", "Id", friendId));
+
+        if (friendshipRepository.friendshipExists(user.getId(), friendId, FriendshipStatus.PENDING.getName())) {
+            logger.error("Friendship requests already exists for user: {} and friend: {}", userEmail, friendId);
+            throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_ALREADY_PENDING);
+        } else if (friendshipRepository.friendshipExists(user.getId(), friendId, FriendshipStatus.ACTIVE.getName())) {
+            logger.error("Friendship  already exists for user: {} and friend: {}", userEmail, friendId);
+            throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_ALREADY_ACTIVE);
+        } else if (friendshipRepository.friendshipExists(user.getId(), friendId, FriendshipStatus.BLOCKED.getName())) {
+            logger.error("User : {} blocked by: {}", userEmail, friendId);
+            throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_BLOCKED);
+        }
+
+        Friendship friendship = new Friendship();
+        friendship.setUser(user);
+        friendship.setFriend(friend);
+        friendship.setFriendshipStatus(FriendshipStatus.PENDING);
+
+        logger.info("Sending friend request: {} to: {}", userEmail, friendId);
+
+        return FriendshipMapper.INSTANCE.friendshipToFriendshipDTOUserVersion(friendshipRepository.save(friendship));
+    }
+
+    public FriendshipResponse retrieveUserFriendshipRequests(String email, int pageNo, int pageSize, String sortBy, String sortDir) {
+        User user = repository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        Pageable pageable = friendshipHelper.getFriendshipPageable(pageNo, pageSize, sortBy, sortDir);
+        Page<Friendship> friendshipPage = friendshipRepository.findAllFriendRequests(user.getId(), pageable);
+
+        List<FriendshipDTO> friendships = new ArrayList<>();
+
+        for (Friendship friendship : friendshipPage) {
+            friendships.add(FriendshipMapper.INSTANCE.friendshipToFriendshipDTOFriendVersion(friendship));
+        }
+
+        logger.info("Retrieving friendship requests for: {}", email);
+        return FriendshipMapper.INSTANCE.pageToFriendshipResponse(friendshipPage, friendships);
+    }
+
+    public FriendshipResponse retrieveUserSentFriendshipRequests(String email, int pageNo, int pageSize, String sortBy, String sortDir) {
+        User user = repository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        Pageable pageable = friendshipHelper.getFriendshipPageable(pageNo, pageSize, sortBy, sortDir);
+        Page<Friendship> friendshipPage = friendshipRepository.findAllSentFriendRequests(user.getId(), pageable);
+
+        List<FriendshipDTO> friendships = new ArrayList<>();
+
+        for (Friendship friendship : friendshipPage) {
+            friendships.add(FriendshipMapper.INSTANCE.friendshipToFriendshipDTOUserVersion(friendship));
+        }
+
+        logger.info("Retrieving sent friendship requests for: {}", email);
+        return FriendshipMapper.INSTANCE.pageToFriendshipResponse(friendshipPage, friendships);
+    }
+
+    public FriendshipDTO acceptFriendRequest(String email, Long friendshipId) {
+        User user = repository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        Friendship friendship = friendshipRepository.findById(friendshipId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friendship", "Id", friendshipId));
+
+        friendshipHelper.validatePendingFriendshipRequest(user, friendship, friendshipId);
+
+        friendship.setFriendshipStatus(FriendshipStatus.ACTIVE);
+        logger.info("Accepting friendship request : {} from: {}", friendshipId, friendship.getUser().getEmail());
+        return FriendshipMapper.INSTANCE.friendshipToFriendshipDTOFriendVersion(friendshipRepository.save(friendship));
+    }
+
+    public void rejectFriendRequest(String email, Long friendshipId) {
+        User user = repository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        Friendship friendship = friendshipRepository.findById(friendshipId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friendship", "Id", friendshipId));
+
+        friendshipHelper.validatePendingFriendshipRequest(user, friendship, friendshipId);
+
+         friendshipRepository.delete(friendship);
+         logger.info("User: {} rejected friendship request: {}", user.getId(), friendshipId);
     }
 }
