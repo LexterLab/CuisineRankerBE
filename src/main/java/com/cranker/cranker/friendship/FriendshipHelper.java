@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class FriendshipHelper {
     private final Logger logger = LogManager.getLogger(this);
 
-    public Pageable getFriendshipPageAbl(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public Pageable getFriendshipPageable(int pageNo, int pageSize, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
