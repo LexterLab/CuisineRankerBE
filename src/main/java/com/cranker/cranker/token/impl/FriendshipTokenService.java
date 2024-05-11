@@ -31,9 +31,8 @@ public class FriendshipTokenService implements TokenService {
         token.setUserId(user.getId());
         token.setCreatedAt(LocalDateTime.now().toString());
         token.setExpirySeconds(AppConstants.FRIENDSHIP_TOKEN_SPAN.getValue());
-        tokenRepository.save(token);
         logger.info("Generated friendship token:{} for {}", token.getValue(), user.getEmail());
-        return token.getValue();
+        return tokenRepository.save(token).getValue();
     }
 
     @Override
