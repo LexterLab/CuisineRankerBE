@@ -20,8 +20,6 @@ public class FriendshipHelperUnitTest {
 
     @InjectMocks
     private FriendshipHelper friendshipHelper;
-    @Mock
-    private FriendshipRepository friendshipRepository;
 
     @Test
     void shouldPassPendingFriendshipRequestValidation() {
