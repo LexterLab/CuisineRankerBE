@@ -3,13 +3,11 @@ package com.cranker.cranker.unit.friendship;
 import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.friendship.Friendship;
 import com.cranker.cranker.friendship.FriendshipHelper;
-import com.cranker.cranker.friendship.FriendshipRepository;
 import com.cranker.cranker.friendship.FriendshipStatus;
 import com.cranker.cranker.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
