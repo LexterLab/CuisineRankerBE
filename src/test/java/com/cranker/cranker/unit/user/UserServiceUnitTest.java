@@ -12,6 +12,8 @@ import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.user.UserService;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
+import com.cranker.cranker.user.payload.UserResponse;
+import com.cranker.cranker.utils.PageableUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,8 +29,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +46,9 @@ public class UserServiceUnitTest {
 
     @Mock
     private FriendshipHelper friendshipHelper;
+
+    @Mock
+    private PageableUtil pageableUtil;
 
     @InjectMocks
     private UserService service;
@@ -212,6 +216,8 @@ public class UserServiceUnitTest {
 
         when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
         when(friendshipRepository.findAllFriendsByUserId(user.getId(), pageable)).thenReturn(friendshipPage);
+        when(pageableUtil.getPageable(any(Integer.class), any(Integer.class), any(String.class), any(String.class)))
+                .thenReturn(pageable);
 
         FriendshipResponse response = service.retrieveUserFriends(email,0, 10, "updatedAt", "asc");
 
@@ -352,5 +358,254 @@ public class UserServiceUnitTest {
         FriendshipDTO acceptedFriendship = service.acceptFriendRequest(email, friendshipId);
 
         assertEquals(expectedFriendship, acceptedFriendship);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenUnexistingUserAcceptedFriendshipRequest() {
+        String unexisting = "michael323@example.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(unexisting)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.acceptFriendRequest(unexisting, 1L));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenUnexistingAcceptingUnExistingFriendshipRequest() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+        long unexistingFriendshipId = 2L;
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(friendshipRepository.findById(unexistingFriendshipId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> service.acceptFriendRequest(email, unexistingFriendshipId));
+    }
+
+    @Test
+    void shouldRetrieveUserFriendshipRequests() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+
+        ProfilePicture profilePicture = new ProfilePicture();
+        profilePicture.setUrl("ur;");
+        user.setSelectedPic(profilePicture);
+        user.setFirstName("Friend");
+        user.setLastName("Friend");
+
+        User friend = new User();
+        friend.setId(2L);
+
+        String sortBy = "updatedAt";
+        int pageNo = 0;
+        int pageSize = 10;
+
+        Friendship friendship = new Friendship(1L, "Pending", user, friend, LocalDateTime.now(),
+                LocalDateTime.now());
+        String updatedAtFormatted = friendship.getUpdatedAt().getDayOfMonth() + " " + DateTimeFormatter
+                .ofPattern("MMMM").format(friendship.getUpdatedAt()) + " " + friendship.getUpdatedAt().getYear();
+
+
+        FriendshipDTO friendshipDTO = new FriendshipDTO(1L, 1L, "Friend Friend", profilePicture.getUrl(),
+                friendship.getStatus(), updatedAtFormatted, friendship.getCreatedAt(), friendship.getUpdatedAt());
+
+        FriendshipResponse friendshipResponse = new FriendshipResponse(0, 10 , 1L,
+                1, true, List.of(friendshipDTO));
+
+        Sort sort = Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        Page<Friendship> friendshipPage = new PageImpl<>(List.of(friendship), pageable, 1);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(friendshipRepository.findAllFriendRequests(user.getId(), pageable)).thenReturn(friendshipPage);
+        when(pageableUtil.getPageable(any(Integer.class), any(Integer.class), any(String.class), any(String.class)))
+                .thenReturn(pageable);
+
+        FriendshipResponse friendshipRequests = service.retrieveUserFriendshipRequests(email, 0, 10,
+                "updatedAt", "asc");
+
+        assertEquals(friendshipResponse, friendshipRequests);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenUnexistingUserRetrievingFriendshipRequests() {
+        String unexisting = "michael323@example.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(unexisting)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service
+                .retrieveUserFriendshipRequests(unexisting, 0, 10, "updatedAt", "asc"));
+    }
+
+    @Test
+    void shouldRetrieveUserSentFriendshipRequests() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+
+        ProfilePicture profilePicture = new ProfilePicture();
+        profilePicture.setUrl("ur;");
+        User friend = new User();
+        friend.setId(2L);
+        friend.setSelectedPic(profilePicture);
+        friend.setFirstName("Friend");
+        friend.setLastName("Friend");
+
+        String sortBy = "updatedAt";
+        int pageNo = 0;
+        int pageSize = 10;
+
+        Friendship friendship = new Friendship(1L, "Pending", user, friend, LocalDateTime.now(),
+                LocalDateTime.now());
+        String updatedAtFormatted = friendship.getUpdatedAt().getDayOfMonth() + " " + DateTimeFormatter
+                .ofPattern("MMMM").format(friendship.getUpdatedAt()) + " " + friendship.getUpdatedAt().getYear();
+
+        FriendshipDTO friendshipDTO = new FriendshipDTO(1L, 2L, "Friend Friend", profilePicture.getUrl(),
+                friendship.getStatus(), updatedAtFormatted, friendship.getCreatedAt(), friendship.getUpdatedAt());
+
+        FriendshipResponse friendshipResponse = new FriendshipResponse(0, 10 , 1L,
+                1, true, List.of(friendshipDTO));
+
+        Sort sort = Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        Page<Friendship> friendshipPage = new PageImpl<>(List.of(friendship), pageable, 1);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(friendshipRepository.findAllSentFriendRequests(user.getId(), pageable)).thenReturn(friendshipPage);
+        when(pageableUtil.getPageable(any(Integer.class), any(Integer.class), any(String.class), any(String.class)))
+                .thenReturn(pageable);
+
+        FriendshipResponse friendshipRequests = service.retrieveUserSentFriendshipRequests(email, 0, 10,
+                "updatedAt", "asc");
+
+        assertEquals(friendshipResponse, friendshipRequests);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenUnexistingUserRetrievingSentFriendshipRequests() {
+        String unexisting = "michael323@example.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(unexisting)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.retrieveUserSentFriendshipRequests(unexisting, 0, 10,
+                "updatedAt", "asc"));
+    }
+
+    @Test
+    void shouldRejectFriendshipRequest() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+        long friendshipId = 1L;
+        Friendship friendship = new Friendship();
+        friendship.setId(friendshipId);
+        friendship.setUser(user);
+        friendship.setFriendshipStatus(FriendshipStatus.PENDING);
+        LocalDateTime date = LocalDateTime
+                .of(2024, 5, 13, 0, 0, 0, 0);
+        friendship.setUpdatedAt(date);
+        friendship.setCreatedAt(date);
+
+        when(friendshipRepository.findById(friendshipId)).thenReturn(Optional.of(friendship));
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        doNothing().when(friendshipHelper).validatePendingFriendshipRequest(user, friendship, friendshipId);
+        doNothing().when(friendshipRepository).delete(any(Friendship.class));
+
+        service.rejectFriendRequest(email, friendshipId);
+
+        verify(friendshipRepository).delete(friendship);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenUnexistingUserRejectsFriendshipRequest() {
+        String unexisting = "michael323@example.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(unexisting)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.rejectFriendRequest(unexisting, 1L));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenRejectingUnexistingFriendshipRequest() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+        long unexistingFriendshipId = 1L;
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(friendshipRepository.findById(unexistingFriendshipId)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.rejectFriendRequest(email, unexistingFriendshipId));
+    }
+
+    @Test
+    void shouldSearchAvailableUsersToAddAsAFriend() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+        ProfilePicture profilePicture = new ProfilePicture();
+        profilePicture.setUrl("url");
+
+        User friend = new User();
+        friend.setId(2L);
+        friend.setEmail("email");
+        friend.setFirstName("Friend");
+        friend.setLastName("Friend");
+        friend.setSelectedPic(profilePicture);
+        friend.setIsVerified(true);
+        friend.setIsTwoFactorEnabled(false);
+
+        String sortBy = "updatedAt";
+        int pageNo = 0;
+        int pageSize = 10;
+
+        UserDTO userDTO = new UserDTO(friend.getId(),
+                "Friend Friend", friend.getEmail(), "url", true, false);
+
+        Sort sort = Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        Page<User> userPage = new PageImpl<>(List.of(friend), pageable, 1);
+
+        UserResponse expectedResponse = new UserResponse(0, 10 , 1L,
+                1, true, List.of(userDTO));
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(pageableUtil.getPageable(any(Integer.class), any(Integer.class), any(String.class), any(String.class)))
+                .thenReturn(pageable);
+        when(userRepository.findAllByNameAndNotFriends("name", user, pageable)).thenReturn(userPage);
+
+        UserResponse response = service.searchUsers(email, "name", 0, 10,
+                "id", "asc");
+
+        assertEquals(expectedResponse, response);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenUnexistingUserSearchesThroughUsers() {
+        String unexisting = "michael323@example.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(unexisting)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.searchUsers(unexisting, "name", 0, 10,
+                "id", "asc"));
     }
 }
