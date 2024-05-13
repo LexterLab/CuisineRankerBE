@@ -7,6 +7,8 @@ import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.model.ProfilePictureCategory;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
 import com.cranker.cranker.profile_pic.repository.ProfilePictureRepository;
+import com.cranker.cranker.token.TokenService;
+import com.cranker.cranker.token.payload.TokenDTO;
 import com.cranker.cranker.user.User;
 import com.cranker.cranker.user.UserRepository;
 import com.cranker.cranker.user.UserService;
@@ -49,6 +51,9 @@ public class UserServiceUnitTest {
 
     @Mock
     private PageableUtil pageableUtil;
+
+    @Mock
+    private TokenService tokenService;
 
     @InjectMocks
     private UserService service;
@@ -608,4 +613,32 @@ public class UserServiceUnitTest {
         assertThrows(ResourceNotFoundException.class, () -> service.searchUsers(unexisting, "name", 0, 10,
                 "id", "asc"));
     }
+
+    @Test
+    void shouldGenerateFriendshipToken() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+
+        String token = "friendshipToken";
+        TokenDTO tokenDTO = new TokenDTO(token);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(tokenService.generateToken(user)).thenReturn(token);
+
+        TokenDTO friendshipToken = service.generateFriendshipToken(email);
+
+        assertEquals(tokenDTO, friendshipToken);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenUnexistingUserGeneratesFriendshipToken() {
+        String unexisting = "michael323@example.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(unexisting)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.generateFriendshipToken(unexisting));
+    }
+
+
 }
