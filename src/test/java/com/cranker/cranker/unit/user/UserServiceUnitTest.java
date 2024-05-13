@@ -1,10 +1,8 @@
 package com.cranker.cranker.unit.user;
 
+import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
-import com.cranker.cranker.friendship.Friendship;
-import com.cranker.cranker.friendship.FriendshipDTO;
-import com.cranker.cranker.friendship.FriendshipRepository;
-import com.cranker.cranker.friendship.FriendshipResponse;
+import com.cranker.cranker.friendship.*;
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.model.ProfilePictureCategory;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
@@ -28,6 +26,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 
@@ -42,6 +42,9 @@ public class UserServiceUnitTest {
 
     @Mock
     private FriendshipRepository friendshipRepository;
+
+    @Mock
+    private FriendshipHelper friendshipHelper;
 
     @InjectMocks
     private UserService service;
@@ -225,5 +228,129 @@ public class UserServiceUnitTest {
                 .retrieveUserFriends(email,0, 10, "updatedAt", "asc"));
     }
 
+    @Test
+    void shouldSendFriendshipRequest() {
+        String email = "michael323@example.com";
 
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+        ProfilePicture profilePicture = new ProfilePicture();
+        profilePicture.setUrl("url;");
+
+        User friend = new User();
+        friend.setId(2L);
+        friend.setFirstName("First");
+        friend.setLastName("Last");
+        friend.setSelectedPic(profilePicture);
+
+
+        Friendship friendship = new Friendship();
+        friendship.setId(1L);
+        friendship.setFriend(friend);
+        friendship.setUser(user);
+        friendship.setFriendshipStatus(FriendshipStatus.PENDING);
+        LocalDateTime date = LocalDateTime
+                .of(2024, 5, 13, 0, 0, 0, 0);
+        friendship.setUpdatedAt(date);
+        friendship.setCreatedAt(date);
+        String friendName = friendship.getFriend().getFirstName() + " " + friendship.getFriend().getLastName();
+
+
+        FriendshipDTO expectedFriendship = new FriendshipDTO(friendship.getId(), friend.getId(), friendName,
+                friend.getSelectedPic().getUrl(),FriendshipStatus.PENDING.getName(),
+                "13 May 2024", date, date);
+
+        when(friendshipRepository.friendshipExists(user.getId(), friend.getId(), FriendshipStatus.PENDING.getName()))
+                .thenReturn(false);
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(userRepository.findById(friend.getId())).thenReturn(Optional.of(friend));
+        when(friendshipRepository.save(any(Friendship.class))).thenReturn(friendship);
+        doNothing().when(friendshipHelper).validateFriendshipRequest(user.getId(), friend.getId(), email);
+
+        FriendshipDTO pendingFriendship = service.sendFriendRequest(email, friend.getId());
+
+        assertEquals(expectedFriendship, pendingFriendship);
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenSendingExistingFriendshipRequest() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+        long friendId = 2L;
+        User friend = new User();
+        friend.setId(friendId);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(userRepository.findById(friendId)).thenReturn(Optional.of(friend));
+        when(friendshipRepository.friendshipExists(user.getId(), friendId, FriendshipStatus.PENDING.getName()))
+                .thenReturn(true);
+
+        assertThrows(APIException.class, () -> service.sendFriendRequest(email, friendId));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenSendingFriendshipRequestWithUnexistingUser() {
+        String unExistingEmail = "michael323@example.com";
+
+
+        when(userRepository.findUserByEmailIgnoreCase(unExistingEmail)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.sendFriendRequest(unExistingEmail,1L));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenSendingFriendshipRequestWithUnexistingFriend() {
+        long unexistingFriendId = 2L;
+
+        User user = new User();
+        user.setEmail("michael323@example.com");
+
+        when(userRepository.findUserByEmailIgnoreCase("michael323@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findById(unexistingFriendId)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.sendFriendRequest("michael323@example.com",
+                unexistingFriendId));
+    }
+
+    @Test
+    void shouldAcceptFriendshipRequest() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+        user.setFirstName("First");
+        user.setLastName("Last");
+
+        ProfilePicture profilePicture = new ProfilePicture();
+        profilePicture.setUrl("url;");
+        user.setSelectedPic(profilePicture);
+
+        long friendshipId = 1L;
+        Friendship friendship = new Friendship();
+        friendship.setId(friendshipId);
+        friendship.setUser(user);
+        friendship.setFriendshipStatus(FriendshipStatus.PENDING);
+        LocalDateTime date = LocalDateTime
+                .of(2024, 5, 13, 0, 0, 0, 0);
+        friendship.setUpdatedAt(date);
+        friendship.setCreatedAt(date);
+        String friendName = friendship.getUser().getFirstName() + " " + friendship.getUser().getLastName();
+
+        FriendshipDTO expectedFriendship = new FriendshipDTO(friendship.getId(), user.getId(), friendName,
+                user.getSelectedPic().getUrl(),FriendshipStatus.ACTIVE.getName(),
+                "13 May 2024", date, date);
+
+        when(friendshipRepository.findById(friendshipId)).thenReturn(Optional.of(friendship));
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        doNothing().when(friendshipHelper).validatePendingFriendshipRequest(user, friendship, friendshipId);
+        when(friendshipRepository.save(any(Friendship.class))).thenReturn(friendship);
+
+        FriendshipDTO acceptedFriendship = service.acceptFriendRequest(email, friendshipId);
+
+        assertEquals(expectedFriendship, acceptedFriendship);
+    }
 }
