@@ -6,11 +6,13 @@ import com.cranker.cranker.friendship.FriendshipDTO;
 import com.cranker.cranker.friendship.FriendshipResponse;
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
+import com.cranker.cranker.token.payload.TokenDTO;
 import com.cranker.cranker.user.User;
 import com.cranker.cranker.user.UserController;
 import com.cranker.cranker.user.UserService;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
+import com.cranker.cranker.user.payload.UserResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -171,4 +173,152 @@ class UserControllerUnitTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(friendshipResponse, response.getBody());
     }
+    @Test
+    void shouldRespondWithCreatedStatusAndFriendshipDTOWhenRequestingFriendship() {
+        String email = "michael@example.com";
+        long friendId = 1L;
+
+        FriendshipDTO friendshipDTO = new FriendshipDTO(1L, friendId,  "name", "image", "Pending",
+                "20th April", LocalDateTime.now(), LocalDateTime.now());
+
+        when(authentication.getName()).thenReturn(email);
+        when(userService.sendFriendRequest(email, friendId)).thenReturn(friendshipDTO);
+
+        ResponseEntity<FriendshipDTO> response = userController.requestFriendship(authentication, friendId);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(friendshipDTO, response.getBody());
+    }
+
+    @Test
+    void shouldRespondWithUserFriendshipRequestsAndOKStatus() {
+        String email = "michael@example.com";
+
+        long friendId = 1L;
+
+        FriendshipDTO friendshipDTO = new FriendshipDTO(1L, friendId,  "name", "image", "Pending",
+                "20th April", LocalDateTime.now(), LocalDateTime.now());
+
+        FriendshipResponse friendshipResponse = new FriendshipResponse(0, 10,
+                1L, 1, true, List.of(friendshipDTO) );
+
+        when(authentication.getName()).thenReturn(email);
+        when(userService.retrieveUserFriendshipRequests(email, 0, 10,
+                "updatedAt",  "asc")).thenReturn(friendshipResponse);
+
+        ResponseEntity<FriendshipResponse> response = userController.retrieveUserFriendshipRequests(authentication,0, 10,
+                "updatedAt",  "asc" );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(friendshipResponse, response.getBody());
+    }
+
+    @Test
+    void shouldRespondWithUserSentFriendshipRequestsAndOKStatus() {
+        String email = "michael@example.com";
+        long friendId = 1L;
+
+        FriendshipDTO friendshipDTO = new FriendshipDTO(1L, friendId,  "name", "image", "Pending",
+                "20th April", LocalDateTime.now(), LocalDateTime.now());
+
+        FriendshipResponse friendshipResponse = new FriendshipResponse(0, 10,
+                1L, 1, true, List.of(friendshipDTO) );
+
+        when(authentication.getName()).thenReturn(email);
+        when(userService.retrieveUserSentFriendshipRequests(email, 0, 10,
+                "updatedAt",  "asc")).thenReturn(friendshipResponse);
+
+        ResponseEntity<FriendshipResponse> response = userController.retrieveUserSentFriendshipRequests(authentication, 0, 10,
+                "updatedAt",  "asc");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(friendshipResponse, response.getBody());
+
+    }
+
+    @Test
+    void shouldRespondWithAcceptedFriendshipAndOKStatus() {
+        String email = "michael@example.com";
+        long friendId = 1L;
+        long friendshipId = 2L;
+
+        FriendshipDTO friendshipDTO = new FriendshipDTO(1L, friendId,  "name", "image", "Active",
+                "20th April", LocalDateTime.now(), LocalDateTime.now());
+
+        when(authentication.getName()).thenReturn(email);
+        when(userService.acceptFriendRequest(email, friendshipId)).thenReturn(friendshipDTO);
+
+        ResponseEntity<FriendshipDTO> response = userController.acceptFriendship(authentication, friendshipId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(friendshipDTO, response.getBody());
+    }
+
+    @Test
+    void shouldRespondWithNoContentStatusWhenRejectingFriendship() {
+        String email = "michael@example.com";
+        long friendshipId = 1L;
+
+        when(authentication.getName()).thenReturn(email);
+        doNothing().when(userService).rejectFriendRequest(email, friendshipId);
+
+        ResponseEntity<Void> response = userController.rejectFriendship(authentication, friendshipId);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    void shouldRespondWithAvailableUsersAndOKStatus() {
+        String email = "michael@example.com";
+        String query = "user";
+
+        UserDTO userDTO = new UserDTO(1L, "user", email, "picture", true,
+                true);
+        UserResponse userResponse = new UserResponse(0, 10,
+                1L, 1, true, List.of(userDTO));
+
+        when(authentication.getName()).thenReturn(email);
+        when(userService.searchUsers(email, query,0, 10,
+                "updatedAt",  "asc")).thenReturn(userResponse);
+
+        ResponseEntity<UserResponse> response = userController.searchUsers(authentication, query,0, 10,
+                "updatedAt",  "asc");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(userResponse, response.getBody());
+    }
+
+    @Test
+    void shouldRespondWithGeneratedFriendshipTokenAndCreatedStatus() {
+        String email = "michael@example.com";
+        TokenDTO tokenDTO = new TokenDTO("token");
+
+        when(authentication.getName()).thenReturn(email);
+        when(userService.generateFriendshipToken(email)).thenReturn(tokenDTO);
+
+        ResponseEntity<TokenDTO> response = userController.generateFriendshipToken(authentication);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(tokenDTO, response.getBody());
+    }
+
+    @Test
+    void shouldRespondWithActivatedFriendshipAndOKStatusWhenActivatingFriendshipToken() {
+        String email = "michael@example.com";
+        long friendId = 1L;
+
+        TokenDTO tokenDTO = new TokenDTO("token");
+
+        FriendshipDTO friendshipDTO = new FriendshipDTO(1L, friendId,  "name", "image", "Active",
+                "20th April", LocalDateTime.now(), LocalDateTime.now());
+
+        when(authentication.getName()).thenReturn(email);
+        when(userService.addFriendViaToken(email, tokenDTO)).thenReturn(friendshipDTO);
+
+        ResponseEntity<FriendshipDTO> response = userController.activateFriendshipToken(authentication, tokenDTO);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(friendshipDTO, response.getBody());
+    }
+
 }
