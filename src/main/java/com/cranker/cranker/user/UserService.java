@@ -101,10 +101,7 @@ public class UserService {
         User friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new ResourceNotFoundException("Friend", "Id", friendId));
 
-        if (friendshipRepository.friendshipExists(user.getId(), friendId, FriendshipStatus.PENDING.getName())) {
-            logger.error("Friendship requests already exists for user: {} and friend: {}", userEmail, friendId);
-            throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_ALREADY_PENDING);
-        }
+
         friendshipHelper.validateFriendshipRequest(user.getId(), friendId, userEmail);
 
         Friendship friendship = new Friendship();

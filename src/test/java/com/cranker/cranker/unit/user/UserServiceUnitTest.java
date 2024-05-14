@@ -273,8 +273,6 @@ public class UserServiceUnitTest {
                 friend.getSelectedPic().getUrl(),FriendshipStatus.PENDING.getName(),
                 "13 May 2024", date, date);
 
-        when(friendshipRepository.friendshipExists(user.getId(), friend.getId(), FriendshipStatus.PENDING.getName()))
-                .thenReturn(false);
         when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
         when(userRepository.findById(friend.getId())).thenReturn(Optional.of(friend));
         when(friendshipRepository.save(any(Friendship.class))).thenReturn(friendship);
@@ -285,23 +283,6 @@ public class UserServiceUnitTest {
         assertEquals(expectedFriendship, pendingFriendship);
     }
 
-    @Test
-    void shouldThrowAPIExceptionWhenSendingExistingFriendshipRequest() {
-        String email = "michael323@example.com";
-        User user = new User();
-        user.setEmail(email);
-        user.setId(1L);
-        long friendId = 2L;
-        User friend = new User();
-        friend.setId(friendId);
-
-        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
-        when(userRepository.findById(friendId)).thenReturn(Optional.of(friend));
-        when(friendshipRepository.friendshipExists(user.getId(), friendId, FriendshipStatus.PENDING.getName()))
-                .thenReturn(true);
-
-        assertThrows(APIException.class, () -> service.sendFriendRequest(email, friendId));
-    }
 
     @Test
     void shouldThrowResourceNotFoundExceptionWhenSendingFriendshipRequestWithUnexistingUser() {

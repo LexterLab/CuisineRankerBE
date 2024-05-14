@@ -32,6 +32,9 @@ public class FriendshipHelper {
         } else if (friendshipRepository.friendshipExists(userId, friendId, FriendshipStatus.BLOCKED.getName())) {
             logger.error("User : {} blocked by: {}", userEmail, friendId);
             throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_BLOCKED);
+        } else  if (friendshipRepository.friendshipExists(userId, friendId, FriendshipStatus.PENDING.getName())) {
+            logger.error("Friendship requests already exists for user: {} and friend: {}", userEmail, friendId);
+            throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_ALREADY_PENDING);
         }
     }
 }
