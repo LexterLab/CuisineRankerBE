@@ -9,7 +9,8 @@ public enum TokenType {
     EMAIL_CONFIRMATION("Email Confirmation Token"),
     RESET_PASSWORD("Reset Password Token"),
     CHANGE_EMAIL("Change Email Token"),
-    TWO_FACTOR("Two-Factor Auth Token");
+    TWO_FACTOR("Two-Factor Auth Token"),
+    FRIENDSHIP("Friendship Token"),;
 
     private final String name;
 }
