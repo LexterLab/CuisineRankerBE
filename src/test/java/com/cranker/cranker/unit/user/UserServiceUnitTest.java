@@ -640,5 +640,127 @@ public class UserServiceUnitTest {
         assertThrows(ResourceNotFoundException.class, () -> service.generateFriendshipToken(unexisting));
     }
 
+    @Test
+    void shouldAddFriendViaToken() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
 
+        String token = "friendshipToken";
+        TokenDTO tokenDTO = new TokenDTO(token);
+
+        ProfilePicture profilePicture = new ProfilePicture();
+        profilePicture.setUrl("url");
+        User friend = new User();
+        friend.setId(2L);
+        friend.setFirstName("First");
+        friend.setLastName("Last");
+        friend.setSelectedPic(profilePicture);
+
+        Friendship friendship = new Friendship();
+        friendship.setId(3L);
+        friendship.setUser(user);
+        friendship.setFriend(friend);
+        friendship.setFriendshipStatus(FriendshipStatus.ACTIVE);
+        LocalDateTime date = LocalDateTime
+                .of(2024, 5, 13, 0, 0, 0, 0);
+        friendship.setUpdatedAt(date);
+        friendship.setCreatedAt(date);
+        String friendName = friendship.getFriend().getFirstName() + " " + friendship.getFriend().getLastName();
+
+        FriendshipDTO expectedFriendship = new FriendshipDTO(friendship.getId(), friend.getId(), friendName,
+                friend.getSelectedPic().getUrl(),FriendshipStatus.ACTIVE.getName(),
+                "13 May 2024", date, date);
+
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        doNothing().when(tokenService).confirmToken(any(String.class));
+        when(tokenService.getUserByToken(tokenDTO.value())).thenReturn(friend);
+        when(friendshipRepository.friendshipExists(user.getId(), friend.getId(), FriendshipStatus.PENDING.getName()))
+                .thenReturn(false);
+        doNothing().when(friendshipHelper)
+                .validateFriendshipRequest(any(Long.class), any(Long.class), any(String.class));
+        when(friendshipRepository.save(any(Friendship.class))).thenReturn(friendship);
+
+        FriendshipDTO friendshipViaToken = service.addFriendViaToken(email, tokenDTO);
+
+        assertEquals(expectedFriendship, friendshipViaToken);
+    }
+
+    @Test
+    void shouldChangeExistingPendingFriendshipToActiveWhenAddingViaToken() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+        String token = "friendshipToken";
+        TokenDTO tokenDTO = new TokenDTO(token);
+
+        ProfilePicture profilePicture = new ProfilePicture();
+        profilePicture.setUrl("url");
+        User friend = new User();
+        friend.setId(2L);
+        friend.setFirstName("First");
+        friend.setLastName("Last");
+        friend.setSelectedPic(profilePicture);
+
+        Friendship friendship = new Friendship();
+        friendship.setId(3L);
+        friendship.setUser(user);
+        friendship.setFriend(friend);
+        friendship.setFriendshipStatus(FriendshipStatus.ACTIVE);
+        LocalDateTime date = LocalDateTime
+                .of(2024, 5, 13, 0, 0, 0, 0);
+        friendship.setUpdatedAt(date);
+        friendship.setCreatedAt(date);
+        String friendName = friendship.getFriend().getFirstName() + " " + friendship.getFriend().getLastName();
+
+        FriendshipDTO expectedFriendship = new FriendshipDTO(friendship.getId(), friend.getId(), friendName,
+                friend.getSelectedPic().getUrl(),FriendshipStatus.ACTIVE.getName(),
+                "13 May 2024", date, date);
+
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        doNothing().when(tokenService).confirmToken(any(String.class));
+        when(tokenService.getUserByToken(tokenDTO.value())).thenReturn(friend);
+        when(friendshipRepository.friendshipExists(user.getId(), friend.getId(), FriendshipStatus.PENDING.getName()))
+                .thenReturn(true);
+        when(friendshipRepository.findByUserIdAndFriendId(user.getId(), friend.getId())).thenReturn(Optional.of(friendship));
+        when(friendshipRepository.save(any(Friendship.class))).thenReturn(friendship);
+
+        FriendshipDTO friendshipViaToken = service.addFriendViaToken(email, tokenDTO);
+
+        assertEquals(expectedFriendship, friendshipViaToken);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenUnexistingUserAddsFriendViaToken() {
+        String unexisting = "unexisting@gmail.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(unexisting)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service
+                .addFriendViaToken(unexisting, new TokenDTO("token")));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenAddingYourselfViaFriendToken() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+        String token = "friendshipToken";
+        TokenDTO tokenDTO = new TokenDTO(token);
+
+        User friend = new User();
+        friend.setId(1L);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        doNothing().when(tokenService).confirmToken(any(String.class));
+        when(tokenService.getUserByToken(tokenDTO.value())).thenReturn(friend);
+
+        assertThrows(APIException.class, () -> service.addFriendViaToken(email, tokenDTO));
+    }
 }
