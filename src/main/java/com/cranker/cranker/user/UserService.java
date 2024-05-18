@@ -185,6 +185,7 @@ public class UserService {
 
         Page<User> userPage = userRepository.findAllByNameAndNotFriends(query, user, pageable);
 
+        logger.info("Searching users for: {}", email);
         return UserResponseMapper.INSTANCE.pageToUserResponse(userPage, UserResponseMapper.INSTANCE
                 .entityToDTO(userPage.getContent()));
     }
@@ -209,6 +210,7 @@ public class UserService {
         User friend = friendshipTokenService.getUserByToken(tokenDTO.value());
 
         if (friend.getId().equals(user.getId())) {
+            logger.error(Messages.ADDING_YOURSELF_AS_FRIEND + "{}, {}", user.getId(), friend.getId());
             throw new APIException(HttpStatus.BAD_REQUEST, Messages.ADDING_YOURSELF_AS_FRIEND);
         }
 
@@ -228,6 +230,7 @@ public class UserService {
         friendship.setFriend(friend);
         friendship.setFriendshipStatus(FriendshipStatus.ACTIVE);
 
+        logger.info("Successfully activated friendship with token: {}", tokenDTO.value());
         return FriendshipMapper.INSTANCE.friendshipToFriendshipDTOUserVersion(friendshipRepository.save(friendship));
     }
 

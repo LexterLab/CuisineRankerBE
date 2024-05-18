@@ -305,7 +305,7 @@ public class UserController {
     })
     @PreAuthorize("hasRole('USER')")
     @PatchMapping("friends/token")
-    public ResponseEntity<FriendshipDTO> activateFriendshipToken(Authentication authentication, TokenDTO tokenDTO) {
+    public ResponseEntity<FriendshipDTO> activateFriendshipToken(Authentication authentication, @RequestBody TokenDTO tokenDTO) {
         return ResponseEntity.ok(service.addFriendViaToken(authentication.getName(), tokenDTO));
     }
 
