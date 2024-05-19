@@ -230,7 +230,7 @@ public class UserController {
             name = "Bearer Authentication"
     )
     @ApiResponses( value = {
-            @ApiResponse( responseCode = "204", description = "Http Status 200 NO CONTENT"),
+            @ApiResponse( responseCode = "204", description = "Http Status 204 NO CONTENT"),
             @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
             @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND"),
             @ApiResponse( responseCode = "409", description = "Http Status 409 CONFLICT"),
@@ -307,6 +307,27 @@ public class UserController {
     @PatchMapping("friends/token")
     public ResponseEntity<FriendshipDTO> activateFriendshipToken(Authentication authentication, @RequestBody TokenDTO tokenDTO) {
         return ResponseEntity.ok(service.addFriendViaToken(authentication.getName(), tokenDTO));
+    }
+
+
+    @Operation(
+            summary = "Cancel Sent Friendship Request REST API",
+            description = "Cancel Sent Friendship Request REST API is used to cancel sent friendship request by user"
+    )
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "204", description = "Http Status 204 NO CONTENT"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND"),
+            @ApiResponse( responseCode = "409", description = "Http Status 409 CONFLICT"),
+    })
+    @PreAuthorize("hasRole('USER')")
+    @DeleteMapping("friends/requests/{friendshipId}/cancel")
+    public ResponseEntity<Void> cancelSentFriendshipRequest(Authentication authentication, @PathVariable Long friendshipId) {
+        service.cancelFriendshipRequest(authentication.getName(), friendshipId);
+        return ResponseEntity.noContent().build();
     }
 
 }
