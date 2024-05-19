@@ -234,5 +234,19 @@ public class UserService {
         return FriendshipMapper.INSTANCE.friendshipToFriendshipDTOUserVersion(friendshipRepository.save(friendship));
     }
 
+    @Transactional
+    public void cancelFriendshipRequest(String email, Long friendshipId) {
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        Friendship friendship = friendshipRepository.findById(friendshipId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friendship", "Id", friendshipId));
+
+        friendshipHelper.validatePendingSentFriendshipRequest(user, friendship);
+
+        friendshipRepository.delete(friendship);
+        logger.info("User: {} cancelled friendship request: {}", user.getId(), friendshipId);
+    }
+
 
 }
