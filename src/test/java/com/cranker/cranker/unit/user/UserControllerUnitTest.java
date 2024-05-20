@@ -321,4 +321,17 @@ class UserControllerUnitTest {
         assertEquals(friendshipDTO, response.getBody());
     }
 
+    @Test
+    void shouldRespondWithNoContentStatusWhenRejectingPendingFriendship() {
+        String email = "michael@example.com";
+        long friendshipId = 1L;
+
+        when(authentication.getName()).thenReturn(email);
+        doNothing().when(userService).cancelFriendshipRequest(email, friendshipId);
+
+        ResponseEntity<Void> response = userController.cancelSentFriendshipRequest(authentication, friendshipId);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
 }
