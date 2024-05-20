@@ -62,4 +62,46 @@ public class FriendshipHelperUnitTest {
         assertThrows(APIException.class, () ->  friendshipHelper
                 .validatePendingFriendshipRequest(impostor, friendship, friendship.getId()));
     }
+
+    @Test
+    void shouldPassSentPendingFriendshipRequestValidation() {
+        User user = new User();
+        user.setId(1L);
+
+        Friendship friendship = new Friendship();
+        friendship.setId(1L);
+        friendship.setUser(user);
+        friendship.setFriendshipStatus(FriendshipStatus.PENDING);
+
+        assertDoesNotThrow(() -> friendshipHelper.validatePendingSentFriendshipRequest(user, friendship));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenSentPendingFriendshipRequestIsNotPending() {
+        User user = new User();
+        user.setId(1L);
+
+        Friendship friendship = new Friendship();
+        friendship.setId(1L);
+        friendship.setUser(user);
+        friendship.setFriendshipStatus(FriendshipStatus.ACTIVE);
+
+        assertThrows(APIException.class, () ->  friendshipHelper.validatePendingSentFriendshipRequest(user, friendship));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenUserDoesNotBelongToSentFriendshipRequest() {
+        User actualUser = new User();
+        actualUser.setId(1L);
+
+        User impostor = new User();
+        impostor.setId(2L);
+
+        Friendship friendship = new Friendship();
+        friendship.setId(1L);
+        friendship.setUser(actualUser);
+        friendship.setFriendshipStatus(FriendshipStatus.PENDING);
+
+        assertThrows(APIException.class, () ->  friendshipHelper.validatePendingSentFriendshipRequest(impostor, friendship));
+    }
 }

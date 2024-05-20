@@ -744,4 +744,50 @@ public class UserServiceUnitTest {
 
         assertThrows(APIException.class, () -> service.addFriendViaToken(email, tokenDTO));
     }
+
+    @Test
+    void shouldCancelFriendshipRequest() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+        long friendshipId = 1L;
+        Friendship friendship = new Friendship();
+        friendship.setId(friendshipId);
+        friendship.setUser(user);
+        friendship.setFriendshipStatus(FriendshipStatus.PENDING);
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(friendshipRepository.findById(friendshipId)).thenReturn(Optional.of(friendship));
+        doNothing().when(friendshipRepository).delete(any(Friendship.class));
+
+        service.cancelFriendshipRequest(email, friendshipId);
+
+        verify(friendshipRepository).delete(friendship);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenUnexistingUserCancelsFriendshipRequest() {
+        String unexistingEmail = "michael323@example.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(unexistingEmail)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.cancelFriendshipRequest(unexistingEmail, 1L));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenCancellingUnexistingFriendshipRequest() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+        long unexistingFriendshipId = 1L;
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(friendshipRepository.findById(unexistingFriendshipId)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.cancelFriendshipRequest(email, unexistingFriendshipId));
+    }
 }

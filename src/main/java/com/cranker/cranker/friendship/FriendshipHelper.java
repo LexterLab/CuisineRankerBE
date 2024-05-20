@@ -17,7 +17,7 @@ public class FriendshipHelper {
 
     public void validatePendingFriendshipRequest(User user, Friendship friendship, Long friendshipId) {
         if (!friendship.getFriend().getId().equals(user.getId())) {
-            logger.error("User: {} doesn't match the user in friendship: {}", user.getId(), friendshipId);
+            logger.error("User: {} doesn't match the friend in friendship: {}", user.getId(), friendshipId);
             throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_USER_DONT_MATCH);
         } else if (!friendship.getStatus().equals(FriendshipStatus.PENDING.getName())) {
             logger.error(Messages.FRIENDSHIP_REQUEST_NOT_PENDING + ": {}", friendship.getId());
@@ -35,6 +35,16 @@ public class FriendshipHelper {
         } else  if (friendshipRepository.friendshipExists(userId, friendId, FriendshipStatus.PENDING.getName())) {
             logger.error("Friendship requests already exists for user: {} and friend: {}", userEmail, friendId);
             throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_ALREADY_PENDING);
+        }
+    }
+
+    public void validatePendingSentFriendshipRequest(User user, Friendship friendship) {
+        if (!friendship.getUser().getId().equals(user.getId())) {
+            logger.error("User: {} doesn't match the user in friendship: {}", user.getId(), friendship.getId());
+            throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_USER_DONT_MATCH);
+        } else if (!friendship.getStatus().equals(FriendshipStatus.PENDING.getName())) {
+            logger.error(Messages.FRIENDSHIP_REQUEST_NOT_PENDING + ": {}", friendship.getId());
+            throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_REQUEST_NOT_PENDING);
         }
     }
 }
