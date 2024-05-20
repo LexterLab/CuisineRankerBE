@@ -369,5 +369,37 @@ public class UserControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithNoContentWhenCancellingSentFriendshipRequest() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/friends/requests/" + 4 +"/cancel"))
+                .andExpect(status().isNoContent());
+    }
 
+    @Test
+    @WithMockUser(username = "unexisting@gmail.com", roles = "USER")
+    void shouldRespondWithNotFoundWhenUnExistingUserCancellingSentFriendshipRequest() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/friends/requests/4/cancel"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldRespondWithUnAuthorizedWhenUnAuthenticatedUserCancellingSentFriendshipRequest() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/friends/requests/4/cancel"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithConflictWhenCancellingSomeoneElseFriendshipSentRequest() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/friends/requests/5/cancel"))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithNotFoundWhenCancellingUnexistingFriendshipSentRequest() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/friends/requests/0/cancel"))
+                .andExpect(status().isNotFound());
+    }
 }
