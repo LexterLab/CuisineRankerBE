@@ -1,6 +1,6 @@
 package com.cranker.cranker.email;
 
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;

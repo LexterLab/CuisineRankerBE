@@ -4,7 +4,7 @@ import com.cranker.cranker.authentication.jwt.JwtTokenProvider;
 import com.cranker.cranker.authentication.jwt.JwtType;
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.token.*;
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 import com.cranker.cranker.utils.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;

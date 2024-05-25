@@ -7,7 +7,7 @@ import com.cranker.cranker.friendship.FriendshipResponse;
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
 import com.cranker.cranker.token.payload.TokenDTO;
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 import com.cranker.cranker.user.UserController;
 import com.cranker.cranker.user.UserService;
 import com.cranker.cranker.user.payload.UserDTO;

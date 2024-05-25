@@ -1,8 +1,8 @@
 package com.cranker.cranker.security;
 
 
-import com.cranker.cranker.user.User;
-import com.cranker.cranker.user.UserRepository;
+import com.cranker.cranker.user.model.User;
+import com.cranker.cranker.user.repository.UserRepository;
 import com.cranker.cranker.utils.Messages;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

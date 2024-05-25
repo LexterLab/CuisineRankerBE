@@ -5,7 +5,7 @@ import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.repository.ProfilePictureRepository;
 import com.cranker.cranker.role.Role;
 import com.cranker.cranker.role.RoleRepository;
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;

@@ -1,13 +1,11 @@
 package com.cranker.cranker.unit.token;
 
-import com.cranker.cranker.authentication.jwt.JwtTokenProvider;
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.token.Token;
 import com.cranker.cranker.token.TokenHelper;
 import com.cranker.cranker.token.TokenRepository;
 import com.cranker.cranker.token.TokenType;
 import com.cranker.cranker.token.impl.ChangeEmailTokenService;
-import com.cranker.cranker.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

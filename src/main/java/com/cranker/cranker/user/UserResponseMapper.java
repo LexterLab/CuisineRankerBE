@@ -1,8 +1,6 @@
 package com.cranker.cranker.user;
 
-import com.cranker.cranker.friendship.Friendship;
-import com.cranker.cranker.friendship.FriendshipDTO;
-import com.cranker.cranker.friendship.FriendshipResponse;
+import com.cranker.cranker.user.model.User;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
 import com.cranker.cranker.user.payload.UserResponse;

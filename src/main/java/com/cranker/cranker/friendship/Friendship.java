@@ -1,6 +1,6 @@
 package com.cranker.cranker.friendship;
 
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

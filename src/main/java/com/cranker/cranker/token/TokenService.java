@@ -1,6 +1,6 @@
 package com.cranker.cranker.token;
 
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 
 public interface TokenService {
      String generateToken(User user);

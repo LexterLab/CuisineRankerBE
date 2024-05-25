@@ -1,4 +1,4 @@
-package com.cranker.cranker.user;
+package com.cranker.cranker.user.model;
 
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.role.Role;
@@ -36,7 +36,6 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
     @CreationTimestamp

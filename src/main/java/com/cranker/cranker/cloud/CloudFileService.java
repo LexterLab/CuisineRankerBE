@@ -2,8 +2,8 @@ package com.cranker.cranker.cloud;
 
 import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
-import com.cranker.cranker.user.User;
-import com.cranker.cranker.user.UserRepository;
+import com.cranker.cranker.user.model.User;
+import com.cranker.cranker.user.repository.UserRepository;
 import com.cranker.cranker.utils.Messages;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
