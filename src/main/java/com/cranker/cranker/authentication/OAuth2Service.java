@@ -52,6 +52,7 @@ public class OAuth2Service {
             user = authenticationHelper.setRoles(user);
             authenticationHelper.setPictures(user);
             user = userRepository.save(user);
+            userRepository.confirmEmail(user.getEmail());
             SocialUser newSocialUser = new SocialUser();
             newSocialUser.setProviderId(providerId);
             newSocialUser.setUser(user);
