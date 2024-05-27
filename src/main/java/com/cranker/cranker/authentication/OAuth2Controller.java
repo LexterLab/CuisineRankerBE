@@ -18,8 +18,7 @@ public class OAuth2Controller {
     private final OAuth2Service oAuth2Service;
 
     @PostMapping("code/google")
-    public ResponseEntity<JWTAuthenticationResponse> handleGoogleLogin(@RequestBody TokenDTO tokenDTO,
-                                                                       HttpServletRequest request) throws GeneralSecurityException, IOException {
-        return new ResponseEntity<>(oAuth2Service.signInWithGoogle(tokenDTO, request), HttpStatus.CREATED);
+    public ResponseEntity<JWTAuthenticationResponse> handleGoogleLogin(@RequestBody TokenDTO tokenDTO) throws GeneralSecurityException, IOException {
+        return new ResponseEntity<>(oAuth2Service.signInWithGoogle(tokenDTO), HttpStatus.CREATED);
     }
 }

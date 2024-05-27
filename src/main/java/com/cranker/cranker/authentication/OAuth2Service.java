@@ -14,7 +14,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +32,7 @@ public class OAuth2Service {
     private final AuthenticationHelper authenticationHelper;
 
     @Transactional
-    public JWTAuthenticationResponse signInWithGoogle(TokenDTO tokenDTO, HttpServletRequest request) throws GeneralSecurityException, IOException {
+    public JWTAuthenticationResponse signInWithGoogle(TokenDTO tokenDTO) throws GeneralSecurityException, IOException {
         String idTokenString = tokenDTO.value();
 
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
