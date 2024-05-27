@@ -21,7 +21,7 @@ public class AuthenticationHelper {
     private final ProfilePictureRepository profilePictureRepository;
     private final PasswordEncoder encoder;
 
-    private User setRoles(User user) {
+    public User setRoles(User user) {
         Optional<Role> userRole = roleRepository.findByName("ROLE_USER");
         Role role = new Role();
         if (userRole.isPresent()) {
@@ -30,7 +30,7 @@ public class AuthenticationHelper {
         user.setRoles(Set.of(role));
         return user;
     }
-    private void setPictures(User user) {
+    public void setPictures(User user) {
         List<ProfilePicture> starterPictures = profilePictureRepository.findAllByCategoryName("STARTER");
         user.setProfilePictures(starterPictures);
         Optional<ProfilePicture> defaultProfilePic = profilePictureRepository.findByNameIgnoreCase("Rattingam");
