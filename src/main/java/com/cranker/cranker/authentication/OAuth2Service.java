@@ -15,7 +15,7 @@ import com.cranker.cranker.utils.Properties;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +41,7 @@ public class OAuth2Service {
     public JWTAuthenticationResponse signInWithGoogle(TokenDTO tokenDTO) throws GeneralSecurityException, IOException {
         String idTokenString = tokenDTO.value();
 
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                 .setAudience(Collections.singletonList(properties.getGoogleClientId()))
                 .build();
 
@@ -50,12 +50,13 @@ public class OAuth2Service {
         String providerId = payload.getSubject();
         String email = payload.getEmail();
 
-        if (userRepository.existsByEmailIgnoreCase(email)) {
-            logger.error("User with email {} already exists", email);
-            throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_EXISTS);
-        }
+
 
         SocialUser socialUser = socialUserRepository.findByProviderId(providerId).orElseGet(() -> {
+            if (userRepository.existsByEmailIgnoreCase(email)) {
+                logger.error("User with email {} already exists", email);
+                throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_EXISTS);
+            }
             User user = new User();
             user.setEmail(payload.getEmail());
             user.setFirstName(payload.get("given_name") == null ? "Google" : (String) payload.get("given_name"));
