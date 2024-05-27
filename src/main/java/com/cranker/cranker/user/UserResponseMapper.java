@@ -18,6 +18,7 @@ public interface UserResponseMapper {
     UserResponseMapper INSTANCE = Mappers.getMapper(UserResponseMapper.class);
     @Mapping(expression = "java(user.getFirstName() + ' ' + user.getLastName())", target = "name")
     @Mapping(expression = "java(user.getSelectedPic().getUrl())", target = "profilePicURL")
+    @Mapping(expression = "java(!user.getSocialUsers().isEmpty())", target = "isSocial")
     UserDTO entityToDTO(User user);
 
     @Mapping(target = "users", source = "userDTOS")

@@ -25,6 +25,7 @@ import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -146,6 +147,7 @@ public class UserServiceUnitTest {
         user.setEmail(email);
         user.setIsVerified(true);
         user.setIsTwoFactorEnabled(true);
+        user.setSocialUsers(new ArrayList<>());
 
         Long pictureId = 1L;
         ProfilePicture profilePicture = new ProfilePicture();
@@ -154,7 +156,7 @@ public class UserServiceUnitTest {
 
         user.setSelectedPic(profilePicture);
         UserDTO expectedUser = new UserDTO(user.getId(), null, user.getEmail(),
-                user.getSelectedPic().getUrl(), user.getIsVerified(), user.getIsTwoFactorEnabled());
+                user.getSelectedPic().getUrl(), user.getIsVerified(), user.getIsTwoFactorEnabled(), false);
 
         when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
         when(pictureRepository.findById(pictureId)).thenReturn(Optional.of(profilePicture));
@@ -563,7 +565,7 @@ public class UserServiceUnitTest {
         int pageSize = 10;
 
         UserDTO userDTO = new UserDTO(friend.getId(),
-                "Friend Friend", friend.getEmail(), "url", true, false);
+                "Friend Friend", friend.getEmail(), "url", true, false, false);
 
         Sort sort = Sort.by(sortBy).ascending();
 

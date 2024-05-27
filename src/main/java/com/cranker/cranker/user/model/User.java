@@ -12,6 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -67,4 +68,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "pic_id", referencedColumnName = "id")
     )
     private List<ProfilePicture> profilePictures;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL)
+    private List<SocialUser> socialUsers = new ArrayList<>();
 }
