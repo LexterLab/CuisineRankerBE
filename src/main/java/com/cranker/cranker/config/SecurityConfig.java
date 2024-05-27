@@ -65,14 +65,13 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/auth/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/oauth2/code/google").permitAll()
                                 .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling((exceptions) ->
                         exceptions.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-//                .oauth2Login(oauth2Login ->
-//                        oauth2Login.loginPage("/api/v1/auth/login/oauth2/code/google"))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
