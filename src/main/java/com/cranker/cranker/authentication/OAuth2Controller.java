@@ -2,7 +2,6 @@ package com.cranker.cranker.authentication;
 
 import com.cranker.cranker.authentication.jwt.JWTAuthenticationResponse;
 import com.cranker.cranker.token.payload.TokenDTO;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
