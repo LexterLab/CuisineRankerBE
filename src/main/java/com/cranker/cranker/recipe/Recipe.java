@@ -1,9 +1,8 @@
 package com.cranker.cranker.recipe;
 
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

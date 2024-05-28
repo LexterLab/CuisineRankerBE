@@ -1,4 +1,4 @@
-package com.cranker.cranker.user;
+package com.cranker.cranker.user.model;
 
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.role.Role;
@@ -12,6 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +37,6 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
     @CreationTimestamp
@@ -68,4 +68,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "pic_id", referencedColumnName = "id")
     )
     private List<ProfilePicture> profilePictures;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL)
+    private List<SocialUser> socialUsers = new ArrayList<>();
 }

@@ -2,7 +2,7 @@ package com.cranker.cranker.integration.authentication;
 
 import com.cranker.cranker.authentication.payload.*;
 import com.cranker.cranker.email.EmailService;
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;

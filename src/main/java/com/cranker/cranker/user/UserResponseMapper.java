@@ -1,8 +1,6 @@
 package com.cranker.cranker.user;
 
-import com.cranker.cranker.friendship.Friendship;
-import com.cranker.cranker.friendship.FriendshipDTO;
-import com.cranker.cranker.friendship.FriendshipResponse;
+import com.cranker.cranker.user.model.User;
 import com.cranker.cranker.user.payload.UserDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
 import com.cranker.cranker.user.payload.UserResponse;
@@ -20,6 +18,7 @@ public interface UserResponseMapper {
     UserResponseMapper INSTANCE = Mappers.getMapper(UserResponseMapper.class);
     @Mapping(expression = "java(user.getFirstName() + ' ' + user.getLastName())", target = "name")
     @Mapping(expression = "java(user.getSelectedPic().getUrl())", target = "profilePicURL")
+    @Mapping(expression = "java(!user.getSocialUsers().isEmpty())", target = "isSocial")
     UserDTO entityToDTO(User user);
 
     @Mapping(target = "users", source = "userDTOS")

@@ -1,7 +1,7 @@
 package com.cranker.cranker.friendship;
 
 import com.cranker.cranker.exception.APIException;
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 import com.cranker.cranker.utils.Messages;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;

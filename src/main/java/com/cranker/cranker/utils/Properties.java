@@ -23,4 +23,6 @@ public class Properties {
     private String gcpBucketId;
     @Value("${recipe.default.pic}")
     private String defaultRecipePicture;
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleClientId;
 }

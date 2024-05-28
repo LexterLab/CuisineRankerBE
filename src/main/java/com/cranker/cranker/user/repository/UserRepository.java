@@ -1,5 +1,6 @@
-package com.cranker.cranker.user;
+package com.cranker.cranker.user.repository;
 
+import com.cranker.cranker.user.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

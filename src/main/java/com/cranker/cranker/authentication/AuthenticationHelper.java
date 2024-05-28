@@ -5,7 +5,7 @@ import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.repository.ProfilePictureRepository;
 import com.cranker.cranker.role.Role;
 import com.cranker.cranker.role.RoleRepository;
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class AuthenticationHelper {
     private final ProfilePictureRepository profilePictureRepository;
     private final PasswordEncoder encoder;
 
-    private User setRoles(User user) {
+    public User setRoles(User user) {
         Optional<Role> userRole = roleRepository.findByName("ROLE_USER");
         Role role = new Role();
         if (userRole.isPresent()) {
@@ -30,7 +30,7 @@ public class AuthenticationHelper {
         user.setRoles(Set.of(role));
         return user;
     }
-    private void setPictures(User user) {
+    public void setPictures(User user) {
         List<ProfilePicture> starterPictures = profilePictureRepository.findAllByCategoryName("STARTER");
         user.setProfilePictures(starterPictures);
         Optional<ProfilePicture> defaultProfilePic = profilePictureRepository.findByNameIgnoreCase("Rattingam");

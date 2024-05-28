@@ -7,7 +7,7 @@ import com.cranker.cranker.friendship.FriendshipResponse;
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
 import com.cranker.cranker.token.payload.TokenDTO;
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 import com.cranker.cranker.user.UserController;
 import com.cranker.cranker.user.UserService;
 import com.cranker.cranker.user.payload.UserDTO;
@@ -55,7 +55,8 @@ class UserControllerUnitTest {
 
     @Test
     public void shouldReturnUserInfoWhenGivenValidUsernameOrEmail() {
-        UserDTO expectedUser = new UserDTO(1L,"Michael Myers", "michael@example.com", "URL",true, true);
+        UserDTO expectedUser = new UserDTO(1L,"Michael Myers", "michael@example.com", "URL",
+                true, true, false);
 
         when(authentication.getName()).thenReturn("michael@example.com");
         when(userService.retrieveUserInfo("michael@example.com")).thenReturn(expectedUser);
@@ -125,7 +126,7 @@ class UserControllerUnitTest {
     void shouldChangeUserProfilePicture() {
         String email = "michael@example.com";
         UserDTO updatedUserInfo = new UserDTO(1L, "user user", "user@gmail.com", "newUrl",
-                true, false);
+                true, false, false);
         long pictureId = 1L;
 
         when(authentication.getName()).thenReturn(email);
@@ -273,7 +274,7 @@ class UserControllerUnitTest {
         String query = "user";
 
         UserDTO userDTO = new UserDTO(1L, "user", email, "picture", true,
-                true);
+                true, false);
         UserResponse userResponse = new UserResponse(0, 10,
                 1L, 1, true, List.of(userDTO));
 
