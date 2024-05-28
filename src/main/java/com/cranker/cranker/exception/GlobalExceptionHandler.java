@@ -78,12 +78,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IOException.class)
     public ResponseEntity<ErrorDetails> handleIOException(IOException exception) {
         ErrorDetails errorDetails = new ErrorDetails(exception.getMessage());
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(GeneralSecurityException.class)
     public ResponseEntity<ErrorDetails> handleGeneralSecurityException(GeneralSecurityException exception){
         ErrorDetails errorDetails = new ErrorDetails(exception.getMessage());
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 }
