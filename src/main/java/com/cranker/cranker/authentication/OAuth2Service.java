@@ -11,11 +11,7 @@ import com.cranker.cranker.user.model.constant.AvailableProvider;
 import com.cranker.cranker.user.repository.SocialUserRepository;
 import com.cranker.cranker.user.repository.UserRepository;
 import com.cranker.cranker.utils.Messages;
-import com.cranker.cranker.utils.Properties;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,31 +21,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
 public class OAuth2Service {
-    private final Properties properties;
     private final UserRepository userRepository;
     private final SocialUserRepository socialUserRepository;
     private final JwtTokenProvider tokenProvider;
     private final AuthenticationHelper authenticationHelper;
+    private final OAuth2Helper oAuth2Helper;
     private final Logger logger = LogManager.getLogger(this);
 
     @Transactional
     public JWTAuthenticationResponse signInWithGoogle(TokenDTO tokenDTO) throws GeneralSecurityException, IOException {
-        String idTokenString = tokenDTO.value();
-
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                .setAudience(Collections.singletonList(properties.getGoogleClientId()))
-                .build();
-
-        GoogleIdToken idToken = verifier.verify(idTokenString);
-        GoogleIdToken.Payload payload = idToken.getPayload();
+        GoogleIdToken.Payload payload =  oAuth2Helper.getGoogleIdTokenPayload(tokenDTO);
         String providerId = payload.getSubject();
         String email = payload.getEmail();
-
 
 
         SocialUser socialUser = socialUserRepository.findByProviderId(providerId).orElseGet(() -> {
@@ -57,6 +44,7 @@ public class OAuth2Service {
                 logger.error("User with email {} already exists", email);
                 throw new APIException(HttpStatus.BAD_REQUEST, Messages.EMAIL_EXISTS);
             }
+
             User user = new User();
             user.setEmail(payload.getEmail());
             user.setFirstName(payload.get("given_name") == null ? "Google" : (String) payload.get("given_name"));
