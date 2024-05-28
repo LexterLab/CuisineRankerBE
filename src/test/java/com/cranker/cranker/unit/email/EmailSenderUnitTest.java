@@ -1,7 +1,7 @@
 package com.cranker.cranker.unit.email;
 
 import com.cranker.cranker.email.EmailSender;
-import com.cranker.cranker.user.User;
+import com.cranker.cranker.user.model.User;
 import com.cranker.cranker.utils.Properties;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;

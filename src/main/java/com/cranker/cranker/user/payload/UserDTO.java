@@ -11,5 +11,6 @@ public record UserDTO(
         @Schema(example = "URL of picture")
         String profilePicURL,
         Boolean isVerified,
-        Boolean isTwoFactorEnabled
+        Boolean isTwoFactorEnabled,
+        Boolean isSocial
 ){}

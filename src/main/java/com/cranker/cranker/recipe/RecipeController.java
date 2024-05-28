@@ -72,7 +72,8 @@ public class RecipeController {
             @ApiResponse( responseCode = "201", description = "Http Status 200 CREATED"),
             @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
             @ApiResponse( responseCode = "403", description = "Http Status 403 FORBIDDEN"),
-            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND"),
+            @ApiResponse( responseCode = "409", description = "Http Status 409 CONFLICT")
     })
     @SecurityRequirement(
             name = "Bearer Authentication"

@@ -13,7 +13,7 @@
 **There is also a competitive side, in which you can participate in different competitions and track your position**
 **on different kinds of leaderboards!**
 
-**You can find out more at: https://github.com/users/LexterLab/projects/5**
+**You can find out more at: https://github.com/users/LexterLab/projects/5?pane=info**
 
 ## What is API?
 
@@ -136,6 +136,31 @@ Replace values with your own google cloud credentials
 spring.cloud.gcp.project-id=cuisine-ranker
 gcp.bucket.id=cuisine-media
 ```
+
+**4. Setup google oauth2 properties in *"application.docker.properties"***
+
+Replace values with your own google oauth2 credentials you can find on: https://console.cloud.google.com/welcome?project=test-project-564b7
+
+```properties
+spring.security.oauth2.client.registration.google.client-id={client_id}
+spring.security.oauth2.client.registration.google.client-secret={client_secret}
+```
+
+
+## Database Management
+You can manage your database via 2 ways:
+
+**1. Managing your databse through docker postgreSQL image command line:**
+
+```bash
+ psql -U postgres -d mydb
+```
+
+**2. Or through pgAdmin docker image, by visiting in your browser: http://localhost:5050/browser/**
+
+## SMTP
+
+SMTP image is already setup and to see sent emails, you can just use maildev, by visiting in your browser: http://localhost:1080/#/
 
 ## Endpoints
 + http://localhost:443/swagger-ui/index.html - Every endpoint is documented here.

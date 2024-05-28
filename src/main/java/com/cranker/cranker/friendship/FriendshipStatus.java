@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum FriendshipStatus {
     PENDING("Pending"),
-    REJECTED("Rejected"),
     ACTIVE("Active"),
     BLOCKED("Blocked");
 

@@ -4,10 +4,9 @@ WORKDIR /app
 COPY . /app
 
 
-RUN apt-get update && apt-get install -y maven
+RUN apt-get update && apt-get install -y maven  &&  mvn clean package -DskipTests
 
 
-RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17
 WORKDIR /app

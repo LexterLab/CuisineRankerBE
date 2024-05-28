@@ -26,4 +26,10 @@ public interface Messages {
     String EMPTY_FILE_NAME = "Empty File Name";
     String RECIPE_EXISTS = "Recipe with this name already exists";
     String INVALID_INGREDIENT_AMOUNT = "Invalid Ingredient Amount (must be a positive number)";
+    String FRIENDSHIP_ALREADY_PENDING = "Friendship request is already pending";
+    String FRIENDSHIP_ALREADY_ACTIVE = "Friendship  is already active";
+    String FRIENDSHIP_BLOCKED = "User has been blocked";
+    String FRIENDSHIP_USER_DONT_MATCH = "User doesn't match friendship request";
+    String FRIENDSHIP_REQUEST_NOT_PENDING = "Friendship request is not pending";
+    String ADDING_YOURSELF_AS_FRIEND = "You cannot add yourself as a friend";
 }

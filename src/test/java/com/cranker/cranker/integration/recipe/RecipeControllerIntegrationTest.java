@@ -148,7 +148,7 @@ public class RecipeControllerIntegrationTest {
 
         RecipeRequestDTO requestDTO = new RecipeRequestDTO
                 (
-                        "Fried Chicken", "Preparation", "https://www.youtube.com/",
+                        "Chicken Breasts", "Preparation", "https://www.youtube.com/",
                         1, 1, Map.of(ingredientId, amount)
                 );
 
