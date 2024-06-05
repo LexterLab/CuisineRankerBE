@@ -2,6 +2,8 @@ package com.cranker.cranker.integration.user;
 
 import com.cranker.cranker.friendship.Friendship;
 import com.cranker.cranker.friendship.FriendshipDTO;
+import com.cranker.cranker.integration.BaseIntegrationTest;
+import com.cranker.cranker.token.payload.TokenDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -20,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class UserControllerIntegrationTest {
+public class UserControllerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -365,7 +367,11 @@ public class UserControllerIntegrationTest {
     @Test
     @WithMockUser(username = "unexisting@gmail.com", roles = "USER")
     void shouldRespondWithNotFoundWhenUnExistingUserActivatesFriendshipToken() throws Exception {
-        mockMvc.perform(patch("/api/v1/users/friends/token"))
+        TokenDTO requestDTO = new TokenDTO("token");
+        mockMvc.perform(patch("/api/v1/users/friends/token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isNotFound());
     }
 
