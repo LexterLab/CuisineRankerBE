@@ -2,6 +2,7 @@ package com.cranker.cranker.integration.authentication;
 
 import com.cranker.cranker.authentication.payload.*;
 import com.cranker.cranker.email.EmailService;
+import com.cranker.cranker.integration.BaseIntegrationTest;
 import com.cranker.cranker.user.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
@@ -26,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class AuthenticationControllerIntegrationTest {
+public class AuthenticationControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
