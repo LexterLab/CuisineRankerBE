@@ -128,7 +128,7 @@ https://console.cloud.google.com/
 ```
 
 
-**3. Setup google cloud properties in *"application.docker.properties"***
+**3. Setup google cloud properties in *"application.docker.properties"* and  *"application.test.properties(Optional)"***
 
 Replace values with your own google cloud credentials
 
@@ -137,7 +137,7 @@ spring.cloud.gcp.project-id=cuisine-ranker
 gcp.bucket.id=cuisine-media
 ```
 
-**4. Setup google oauth2 properties in *"application.docker.properties"***
+**4. Setup google oauth2 properties in *"application.docker.properties"*  *"application.test.properties(Optional)"***
 
 Replace values with your own google oauth2 credentials you can find on: https://console.cloud.google.com/welcome?project=test-project-564b7
 
