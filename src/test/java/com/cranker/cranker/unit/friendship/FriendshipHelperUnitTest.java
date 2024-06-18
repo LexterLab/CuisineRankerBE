@@ -104,4 +104,41 @@ public class FriendshipHelperUnitTest {
 
         assertThrows(APIException.class, () ->  friendshipHelper.validatePendingSentFriendshipRequest(impostor, friendship));
     }
+
+    @Test
+    void shouldThrowAPIExceptionWhenRemovingInactiveFriendship() {
+        User user = new User();
+        user.setId(1L);
+
+        User friend = new User();
+        friend.setId(2L);
+
+        Friendship friendship = new Friendship();
+        friendship.setId(1L);
+        friendship.setUser(user);
+        friendship.setFriend(friend);
+        friendship.setFriendshipStatus(FriendshipStatus.PENDING);
+
+        assertThrows(APIException.class, () -> friendshipHelper.validateRemoveFriendship(friendship, user.getId()));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenUserDoesNotBelongToFriendship() {
+        User fakeUser = new User();
+        fakeUser.setId(1L);
+
+        User friend = new User();
+        friend.setId(2L);
+
+        User user = new User();
+        user.setId(3L);
+
+        Friendship friendship = new Friendship();
+        friendship.setId(1L);
+        friendship.setUser(user);
+        friendship.setFriend(friend);
+        friendship.setFriendshipStatus(FriendshipStatus.ACTIVE);
+
+        assertThrows(APIException.class, () ->  friendshipHelper.validateRemoveFriendship(friendship, fakeUser.getId()));
+    }
 }
