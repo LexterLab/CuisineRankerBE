@@ -335,4 +335,17 @@ class UserControllerUnitTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
+    @Test
+    void shouldRespondWithNoContentStatusWhenRemovingFriendship() {
+        String email = "michael@example.com";
+        long friendshipId = 1L;
+
+        when(authentication.getName()).thenReturn(email);
+        doNothing().when(userService).removeFriendship(email, friendshipId);
+
+        ResponseEntity<Void> response = userController.removeFriendship(authentication, friendshipId);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
 }

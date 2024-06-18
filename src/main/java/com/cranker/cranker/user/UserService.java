@@ -250,5 +250,17 @@ public class UserService {
         logger.info("User: {} cancelled friendship request: {}", user.getId(), friendshipId);
     }
 
+    @Transactional
+    public void removeFriendship(String email, Long friendshipId) {
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
+        Friendship friendship = friendshipRepository.findById(friendshipId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friendship", "Id", friendshipId));
+
+        friendshipHelper.validateRemoveFriendship(friendship, user.getId());
+
+        friendshipRepository.delete(friendship);
+        logger.info("User: {} removed friendship: {}", user.getId(), friendshipId);
+    }
 }

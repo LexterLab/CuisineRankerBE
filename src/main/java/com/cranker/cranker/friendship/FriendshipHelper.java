@@ -38,6 +38,16 @@ public class FriendshipHelper {
         }
     }
 
+    public void validateRemoveFriendship(Friendship friendship, long userId) {
+        if (!friendship.getStatus().equalsIgnoreCase(FriendshipStatus.ACTIVE.getName())) {
+            logger.error("Cannot remove inactive friendship: {}", friendship.getId());
+            throw new APIException(HttpStatus.CONFLICT, Messages.REMOVE_INACTIVE_FRIENDSHIP);
+        } else if (!friendship.getFriend().getId().equals(userId) && !friendship.getUser().getId().equals(userId)) {
+            logger.error("User: {} doesn't is not in friendship: {}", userId, friendship);
+            throw new APIException(HttpStatus.CONFLICT, Messages.FRIENDSHIP_USER_DONT_MATCH);
+        }
+    }
+
     public void validatePendingSentFriendshipRequest(User user, Friendship friendship) {
         if (!friendship.getUser().getId().equals(user.getId())) {
             logger.error("User: {} doesn't match the user in friendship: {}", user.getId(), friendship.getId());

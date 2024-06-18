@@ -1,7 +1,5 @@
 package com.cranker.cranker.integration.user;
 
-import com.cranker.cranker.friendship.Friendship;
-import com.cranker.cranker.friendship.FriendshipDTO;
 import com.cranker.cranker.integration.BaseIntegrationTest;
 import com.cranker.cranker.token.payload.TokenDTO;
 import com.cranker.cranker.user.payload.UserRequestDTO;
@@ -407,5 +405,46 @@ public class UserControllerIntegrationTest extends BaseIntegrationTest {
     void shouldRespondWithNotFoundWhenCancellingUnexistingFriendshipSentRequest() throws Exception {
         mockMvc.perform(delete("/api/v1/users/friends/requests/0/cancel"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithNoContentStatusWhenRemovingFriendship() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/friends/" + 2))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser(username = "unexsting@gmail.com", roles = "USER")
+    void shouldRespondWithNotFoundWhenNonExistingUserRemovesFriendship() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/friends/" + 2))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithNotFoundWhenRemovingUnexistingFriendship() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/friends/" + 0))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldRespondWithUnAuthorizedWhenUnAuthenticatedUserRemovesFriendship() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/friends/" + 2))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithConflictWhenRemovingInActiveFriendship() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/friends/" + 3))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithConflictWhenRemovingSomeoneElseFriendship() throws Exception {
+        mockMvc.perform(delete("/api/v1/users/friends/" + 5))
+                .andExpect(status().isConflict());
     }
 }

@@ -792,4 +792,54 @@ public class UserServiceUnitTest {
 
         assertThrows(ResourceNotFoundException.class, () -> service.cancelFriendshipRequest(email, unexistingFriendshipId));
     }
+
+    @Test
+    void shouldRemoveFriendship() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(1L);
+
+        User friend = new User();
+        friend.setId(2L);
+
+        Friendship friendship = new Friendship();
+        friendship.setId(1L);
+        friendship.setUser(user);
+        friendship.setFriend(friend);
+        friendship.setFriendshipStatus(FriendshipStatus.ACTIVE);
+
+        long friendshipId = 1L;
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(friendshipRepository.findById(friendshipId)).thenReturn(Optional.of(friendship));
+        doNothing().when(friendshipRepository).delete(friendship);
+
+        service.removeFriendship(email, friendshipId);
+
+        verify(friendshipRepository).delete(friendship);
+    }
+
+    @Test
+    void shouldThrowNotFoundExceptionWhenUserDoesNotExistWhenRemovingFriendship() {
+        String unexisting = "unexisting@example.com";
+
+        when(userRepository.findUserByEmailIgnoreCase(unexisting)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.removeFriendship(unexisting, 1L));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenFriendshipDoesNotExistWhenRemovingFriendship() {
+        String email = "michael323@example.com";
+        User user = new User();
+        user.setEmail(email);
+
+        long unexistingFriendshipId = 1L;
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(friendshipRepository.findById(unexistingFriendshipId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> service.removeFriendship(email, unexistingFriendshipId));
+    }
 }
