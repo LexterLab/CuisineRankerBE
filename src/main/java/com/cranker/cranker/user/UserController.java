@@ -330,4 +330,24 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(
+            summary = "Remove friendship REST API",
+            description = "Remove friendship REST API is used to remove user's friendship"
+    )
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @ApiResponses( value = {
+            @ApiResponse( responseCode = "204", description = "Http Status 204 NO CONTENT"),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND"),
+            @ApiResponse( responseCode = "409", description = "Http Status 409 CONFLICT"),
+    })
+    @PreAuthorize("hasRole('USER')")
+    @DeleteMapping("friends/{friendshipId}")
+    public ResponseEntity<Void> removeFriendship(Authentication authentication, @PathVariable Long friendshipId) {
+        service.removeFriendship(authentication.getName(), friendshipId);
+        return ResponseEntity.noContent().build();
+    }
+
 }
