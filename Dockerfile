@@ -1,10 +1,11 @@
-FROM eclipse-temurin:17 AS build
+FROM maven:3.8.4-openjdk-17 AS build
 LABEL maintainer="alexanderparpulansky@gmail.com"
 WORKDIR /app
-COPY . /app
+COPY pom.xml .
+COPY src ./src
 
 
-RUN apt-get update && apt-get install -y maven  &&  mvn clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 
 
