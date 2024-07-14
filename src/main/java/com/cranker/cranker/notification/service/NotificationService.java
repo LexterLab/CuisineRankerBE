@@ -7,6 +7,7 @@ import com.cranker.cranker.notification.payload.NotificationRequestDTO;
 import com.cranker.cranker.notification.payload.NotificationResponseDTO;
 import com.cranker.cranker.notification.payload.mapper.NotificationMapper;
 import com.cranker.cranker.notification.repository.NotificationRepository;
+import com.cranker.cranker.notification.service.helper.NotificationHelper;
 import com.cranker.cranker.user.model.User;
 import com.cranker.cranker.user.repository.UserRepository;
 import com.cranker.cranker.utils.PageableUtil;
@@ -25,6 +26,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final PageableUtil pageableUtil;
+    private final NotificationHelper notificationHelper;
     private final Logger logger = LogManager.getLogger(this);
 
     public NotificationDTO sendNotification(NotificationRequestDTO requestDTO, User user) {
@@ -48,6 +50,19 @@ public class NotificationService {
 
         return NotificationMapper.INSTANCE.pageToNotificationResponse(notifications,
                 NotificationMapper.INSTANCE.entityToDto(notifications.getContent()));
+    }
+
+    public void dismissNotification(String email, Long notificationId) {
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("notification", "id", notificationId));
+
+        notificationHelper.checkIfNotificationBelongsToUser(notification, user);
+
+        notificationRepository.delete(notification);
+        logger.info("Dismissing notification from {}", user.getEmail());
     }
 
 }

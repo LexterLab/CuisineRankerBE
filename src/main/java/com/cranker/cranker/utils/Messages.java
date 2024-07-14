@@ -33,4 +33,5 @@ public interface Messages {
     String FRIENDSHIP_REQUEST_NOT_PENDING = "Friendship request is not pending";
     String ADDING_YOURSELF_AS_FRIEND = "You cannot add yourself as a friend";
     String REMOVE_INACTIVE_FRIENDSHIP = "Cannot remove inactive friendship";
+    String NOTIFICATION_USER_MISMATCH = "Notification user mismatch";
 }
