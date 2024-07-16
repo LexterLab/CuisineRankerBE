@@ -34,4 +34,7 @@ public interface Messages {
     String ADDING_YOURSELF_AS_FRIEND = "You cannot add yourself as a friend";
     String REMOVE_INACTIVE_FRIENDSHIP = "Cannot remove inactive friendship";
     String NOTIFICATION_USER_MISMATCH = "Notification user mismatch";
+    String ADDED_FRIEND_VIA_TOKEN = " has added you via friendship token";
+    String ACCEPTED_FRIENDSHIP =  " has accepted your friendship";
+    String FRIENDSHIP_REQUEST = " has requested friendship with you";
 }
