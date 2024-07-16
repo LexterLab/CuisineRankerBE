@@ -3,6 +3,9 @@ package com.cranker.cranker.user;
 import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.friendship.*;
+import com.cranker.cranker.notification.model.constant.NotificationType;
+import com.cranker.cranker.notification.payload.NotificationRequestDTO;
+import com.cranker.cranker.notification.service.NotificationService;
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
 import com.cranker.cranker.profile_pic.payload.PictureMapper;
@@ -38,6 +41,7 @@ public class UserService {
     private final FriendshipHelper friendshipHelper;
     private final PageableUtil pageableUtil;
     private final TokenService friendshipTokenService;
+    private final NotificationService notificationService;
 
     public UserDTO retrieveUserInfo(String email) {
         User user = userRepository.findUserByEmailIgnoreCase(email)
@@ -111,6 +115,14 @@ public class UserService {
         friendship.setFriend(friend);
         friendship.setFriendshipStatus(FriendshipStatus.PENDING);
 
+        NotificationRequestDTO notification = NotificationRequestDTO
+                .builder()
+                .title(NotificationType.FRIENDSHIP_REQUESTED.getTITLE())
+                .message(user.getEmail() + Messages.FRIENDSHIP_REQUEST)
+                .build();
+
+        notificationService.sendNotification(notification, friend);
+
         logger.info("Sending friend request: {} to: {}", userEmail, friendId);
 
         return FriendshipMapper.INSTANCE.friendshipToFriendshipDTOUserVersion(friendshipRepository.save(friendship));
@@ -161,6 +173,15 @@ public class UserService {
         friendshipHelper.validatePendingFriendshipRequest(user, friendship, friendshipId);
 
         friendship.setFriendshipStatus(FriendshipStatus.ACTIVE);
+
+        User friend = friendship.getUser();
+        NotificationRequestDTO notification = NotificationRequestDTO.builder()
+                .title(NotificationType.FRIENDSHIP_ACCEPTED.getTITLE())
+                .message(friend.getEmail() + Messages.ACCEPTED_FRIENDSHIP)
+                .build();
+
+        notificationService.sendNotification(notification, friend);
+
         logger.info("Accepting friendship request : {} from: {}", friendshipId, friendship.getUser().getEmail());
         return FriendshipMapper.INSTANCE.friendshipToFriendshipDTOFriendVersion(friendshipRepository.save(friendship));
     }
@@ -231,6 +252,13 @@ public class UserService {
         friendship.setUser(user);
         friendship.setFriend(friend);
         friendship.setFriendshipStatus(FriendshipStatus.ACTIVE);
+
+        NotificationRequestDTO notificationRequestDTO = NotificationRequestDTO.builder()
+                .title(NotificationType.FRIENDSHIP_ADD_TOKEN.getTITLE())
+                .message(user.getEmail() + Messages.ADDED_FRIEND_VIA_TOKEN)
+                .build();
+
+        notificationService.sendNotification(notificationRequestDTO, friend);
 
         logger.info("Successfully activated friendship with token: {}", tokenDTO.value());
         return FriendshipMapper.INSTANCE.friendshipToFriendshipDTOUserVersion(friendshipRepository.save(friendship));
