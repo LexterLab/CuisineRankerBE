@@ -2,7 +2,6 @@ package com.cranker.cranker.notification.service;
 
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.notification.model.Notification;
-import com.cranker.cranker.notification.payload.NotificationDTO;
 import com.cranker.cranker.notification.payload.NotificationRequestDTO;
 import com.cranker.cranker.notification.payload.NotificationResponseDTO;
 import com.cranker.cranker.notification.payload.mapper.NotificationMapper;
@@ -29,11 +28,12 @@ public class NotificationService {
     private final NotificationHelper notificationHelper;
     private final Logger logger = LogManager.getLogger(this);
 
-    public NotificationDTO sendNotification(NotificationRequestDTO requestDTO, User user) {
+    @Transactional
+    public void sendNotification(NotificationRequestDTO requestDTO, User user) {
         Notification notification = NotificationMapper.INSTANCE.notificationRequestToEntity(requestDTO);
         notification.setUser(user);
         logger.info("Sending notification to {}", user.getEmail());
-        return NotificationMapper.INSTANCE.entityToDto(notificationRepository.save(notification));
+        NotificationMapper.INSTANCE.entityToDto(notificationRepository.save(notification));
     }
 
     @Transactional
