@@ -52,6 +52,7 @@ public class NotificationService {
                 NotificationMapper.INSTANCE.entityToDto(notifications.getContent()));
     }
 
+    @Transactional
     public void dismissNotification(String email, Long notificationId) {
         User user = userRepository.findUserByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
