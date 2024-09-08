@@ -63,6 +63,7 @@ public class SecurityConfig {
                         authorize.requestMatchers(
                                         HttpMethod.GET, "/api/v1/**").permitAll()
                                 .requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers("/websocket/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/oauth2/code/google").permitAll()
@@ -81,7 +82,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
