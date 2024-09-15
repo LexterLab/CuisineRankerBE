@@ -34,10 +34,15 @@ public class NotificationService {
     public void sendNotification(NotificationRequestDTO requestDTO, User user) {
         Notification notification = NotificationMapper.INSTANCE.notificationRequestToEntity(requestDTO);
         notification.setUser(user);
+        sendMessage(notification, user);
+    }
+
+    private void sendMessage(Notification notification, User user) {
         logger.info("Sending notification to {}", user.getEmail());
 
         messagingTemplate.convertAndSendToUser(user.getEmail(), "/topic/notifications",
                 NotificationMapper.INSTANCE.entityToDto(notificationRepository.save(notification)));
+        logger.info("Notification sent");
     }
 
     @Transactional
