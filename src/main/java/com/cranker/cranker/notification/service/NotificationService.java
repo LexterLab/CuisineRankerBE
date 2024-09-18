@@ -32,17 +32,21 @@ public class NotificationService {
 
     @Transactional
     public void sendNotification(NotificationRequestDTO requestDTO, User user) {
+        logger.info("Sending notification: {}", requestDTO );
         Notification notification = NotificationMapper.INSTANCE.notificationRequestToEntity(requestDTO);
         notification.setUser(user);
+
+        logger.info("Notification sent: {}", notification );
+
         sendMessage(notification, user);
     }
 
     private void sendMessage(Notification notification, User user) {
-        logger.info("Sending notification to {}", user.getEmail());
+        logger.info("Sending message to {}", user.getEmail());
 
         messagingTemplate.convertAndSendToUser(user.getEmail(), "/topic/notifications",
                 NotificationMapper.INSTANCE.entityToDto(notificationRepository.save(notification)));
-        logger.info("Notification sent");
+        logger.info("Message sent");
     }
 
     @Transactional
@@ -72,6 +76,9 @@ public class NotificationService {
         notificationHelper.checkIfNotificationBelongsToUser(notification, user);
 
         notificationRepository.delete(notification);
+
+        sendMessage(notification, user);
+
         logger.info("Dismissing notification from {}", user.getEmail());
     }
 
