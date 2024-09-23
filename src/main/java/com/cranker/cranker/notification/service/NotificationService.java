@@ -75,7 +75,8 @@ public class NotificationService {
 
         notificationHelper.checkIfNotificationBelongsToUser(notification, user);
 
-        notificationRepository.delete(notification);
+        user.getNotifications().remove(notification);
+        userRepository.save(user);
 
         sendMessage(notification, user);
 
