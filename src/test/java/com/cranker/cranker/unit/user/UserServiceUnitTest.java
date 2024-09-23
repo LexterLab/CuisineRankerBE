@@ -3,6 +3,9 @@ package com.cranker.cranker.unit.user;
 import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.friendship.*;
+import com.cranker.cranker.notification.payload.NotificationDTO;
+import com.cranker.cranker.notification.payload.NotificationRequestDTO;
+import com.cranker.cranker.notification.service.NotificationService;
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.profile_pic.model.ProfilePictureCategory;
 import com.cranker.cranker.profile_pic.payload.PictureDTO;
@@ -58,6 +61,9 @@ public class UserServiceUnitTest {
 
     @InjectMocks
     private UserService service;
+
+    @Mock
+    private NotificationService notificationService;
 
 
 
@@ -664,6 +670,8 @@ public class UserServiceUnitTest {
                 .thenReturn(false);
         doNothing().when(friendshipHelper)
                 .validateFriendshipRequest(any(Long.class), any(Long.class), any(String.class));
+        doNothing().when(notificationService)
+                        .sendNotification(any(NotificationRequestDTO.class), any(User.class));
         when(friendshipRepository.save(any(Friendship.class))).thenReturn(friendship);
 
         FriendshipDTO friendshipViaToken = service.addFriendViaToken(email, tokenDTO);
