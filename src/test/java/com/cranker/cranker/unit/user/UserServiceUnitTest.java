@@ -3,7 +3,6 @@ package com.cranker.cranker.unit.user;
 import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.friendship.*;
-import com.cranker.cranker.notification.payload.NotificationDTO;
 import com.cranker.cranker.notification.payload.NotificationRequestDTO;
 import com.cranker.cranker.notification.service.NotificationService;
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
