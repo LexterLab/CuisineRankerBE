@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("api/v1/notifications")
 @RequiredArgsConstructor
+@Tag(name = "Notification REST APIs")
 public class NotificationController {
     private final NotificationService notificationService;
 
@@ -52,7 +54,7 @@ public class NotificationController {
             name = "Bearer Authentication"
     )
     @ApiResponses( value = {
-            @ApiResponse( responseCode = "200", description = "Http Status 200 OK"),
+            @ApiResponse( responseCode = "204", description = "Http Status 204 NO CONTENT"),
             @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
             @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
     })
