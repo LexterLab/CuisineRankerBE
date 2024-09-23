@@ -1,7 +1,10 @@
 package com.cranker.cranker.notification.payload;
 
+import lombok.Builder;
+
 import java.util.List;
 
+@Builder
 public record NotificationResponseDTO(
         int pageNo,
         int pageSize,

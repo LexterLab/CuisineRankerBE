@@ -15,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +26,7 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final PageableUtil pageableUtil;
     private final NotificationHelper notificationHelper;
-    private final SimpMessagingTemplate messagingTemplate;
+
     private final Logger logger = LogManager.getLogger(this);
 
     @Transactional
@@ -38,16 +37,9 @@ public class NotificationService {
 
         logger.info("Notification sent: {}", notification );
 
-        sendMessage(notification, user);
+        notificationHelper.sendMessage(notification, user);
     }
 
-    private void sendMessage(Notification notification, User user) {
-        logger.info("Sending message to {}", user.getEmail());
-
-        messagingTemplate.convertAndSendToUser(user.getEmail(), "/topic/notifications",
-                NotificationMapper.INSTANCE.entityToDto(notificationRepository.save(notification)));
-        logger.info("Message sent");
-    }
 
     @Transactional
     public NotificationResponseDTO retrieveNotifications(String email, int pageNo, int pageSize, String sortBy,
@@ -78,7 +70,7 @@ public class NotificationService {
         user.getNotifications().remove(notification);
         userRepository.save(user);
 
-        sendMessage(notification, user);
+        notificationHelper.sendMessage(notification, user);
 
         logger.info("Dismissing notification from {}", user.getEmail());
     }
