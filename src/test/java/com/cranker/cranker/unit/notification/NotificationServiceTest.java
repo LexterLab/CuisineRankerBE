@@ -1,5 +1,7 @@
 package com.cranker.cranker.unit.notification;
 
+import com.cranker.cranker.exception.APIException;
+import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.notification.model.Notification;
 import com.cranker.cranker.notification.payload.NotificationRequestDTO;
 import com.cranker.cranker.notification.repository.NotificationRepository;
@@ -15,11 +17,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class NotificationUnitTest {
+public class NotificationServiceTest {
 
     @InjectMocks
     private NotificationService notificationService;
@@ -77,5 +80,53 @@ public class NotificationUnitTest {
         notificationService.dismissNotification(user.getEmail(), notification.getId());
 
         verify(userRepository).save(user);
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenUnknownUserDismissesNotification() {
+        String email = "unknown@gmail.com";
+        Long notificationId = 2L;
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> notificationService.dismissNotification(email, notificationId));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenDismissingUnknownNotification() {
+        String email = "user@gmail.com";
+        User user = new User();
+        user.setEmail(email);
+
+        Long notificationId = 2L;
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(notificationRepository.findById(notificationId)).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> notificationService.dismissNotification(email, notificationId));
+    }
+
+    @Test
+    void shouldThrowAPIExceptionWhenDismissingForeignNotification() {
+        String email = "user@gmail.com";
+        User user = new User();
+        user.setEmail(email);
+
+        User realuser = new User();
+        realuser.setEmail("realuser@gmail.com");
+
+        Long notificationId = 2L;
+        Notification notification = Notification.builder()
+                .message("Hey there")
+                .title("Greetings!")
+                .id(notificationId)
+                .user(realuser)
+                .build();
+
+        when(userRepository.findUserByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(notification));
+        doThrow(APIException.class).when(notificationHelper).checkIfNotificationBelongsToUser(notification, user);
+
+        assertThrows(APIException.class, () -> notificationService.dismissNotification(email, notificationId));
     }
 }
