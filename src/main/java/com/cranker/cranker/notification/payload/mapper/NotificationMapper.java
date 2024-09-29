@@ -16,12 +16,12 @@ import java.util.List;
 public interface NotificationMapper {
     NotificationMapper INSTANCE = Mappers.getMapper(NotificationMapper.class);
 
-    @Mapping(target = "minutesSince", expression = "java(java.time.temporal.ChronoUnit.MINUTES.between(LocalDateTime.now(), notification.getIssued()))")
-    @Mapping(target = "hoursSince", expression = "java(java.time.temporal.ChronoUnit.HOURS.between(LocalDateTime.now(), notification.getIssued()))")
-    @Mapping(target = "daysSince", expression = "java(java.time.temporal.ChronoUnit.DAYS.between(LocalDateTime.now(), notification.getIssued()))")
-    @Mapping(target = "weeksSince", expression = "java(java.time.temporal.ChronoUnit.WEEKS.between(LocalDateTime.now(), notification.getIssued()))")
-    @Mapping(target = "monthsSince", expression = "java(java.time.temporal.ChronoUnit.MONTHS.between(LocalDateTime.now(), notification.getIssued()))")
-    @Mapping(target = "yearsSince", expression = "java(java.time.temporal.ChronoUnit.YEARS.between(LocalDateTime.now(), notification.getIssued()))")
+    @Mapping(target = "minutesSince", expression = "java(Math.abs(java.time.temporal.ChronoUnit.MINUTES.between(java.time.LocalDateTime.now(), notification.getIssued())))")
+    @Mapping(target = "hoursSince", expression = "java(Math.abs(java.time.temporal.ChronoUnit.HOURS.between(java.time.LocalDateTime.now(), notification.getIssued())))")
+    @Mapping(target = "daysSince", expression = "java(Math.abs(java.time.temporal.ChronoUnit.DAYS.between(java.time.LocalDateTime.now(), notification.getIssued())))")
+    @Mapping(target = "weeksSince", expression = "java(Math.abs(java.time.temporal.ChronoUnit.WEEKS.between(java.time.LocalDateTime.now(), notification.getIssued())))")
+    @Mapping(target = "monthsSince", expression = "java(Math.abs(java.time.temporal.ChronoUnit.MONTHS.between(java.time.LocalDateTime.now(), notification.getIssued())))")
+    @Mapping(target = "yearsSince", expression = "java(Math.abs(java.time.temporal.ChronoUnit.YEARS.between(java.time.LocalDateTime.now(), notification.getIssued())))")
     NotificationDTO entityToDto(Notification notification);
     Notification notificationRequestToEntity(NotificationRequestDTO notificationRequestDTO);
 
