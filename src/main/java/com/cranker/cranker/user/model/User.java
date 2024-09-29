@@ -1,5 +1,6 @@
 package com.cranker.cranker.user.model;
 
+import com.cranker.cranker.notification.model.Notification;
 import com.cranker.cranker.profile_pic.model.ProfilePicture;
 import com.cranker.cranker.role.Role;
 import jakarta.persistence.*;
@@ -71,4 +72,7 @@ public class User {
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL)
     private List<SocialUser> socialUsers = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
 }
