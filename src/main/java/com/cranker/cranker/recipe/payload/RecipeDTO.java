@@ -1,4 +1,4 @@
-package com.cranker.cranker.recipe;
+package com.cranker.cranker.recipe.payload;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

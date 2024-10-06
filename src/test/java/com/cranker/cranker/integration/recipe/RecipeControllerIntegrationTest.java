@@ -1,7 +1,7 @@
 package com.cranker.cranker.integration.recipe;
 
 import com.cranker.cranker.integration.BaseIntegrationTest;
-import com.cranker.cranker.recipe.RecipeRequestDTO;
+import com.cranker.cranker.recipe.payload.RecipeRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

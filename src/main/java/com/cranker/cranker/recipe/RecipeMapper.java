@@ -1,5 +1,7 @@
 package com.cranker.cranker.recipe;
 
+import com.cranker.cranker.recipe.payload.RecipeDTO;
+import com.cranker.cranker.recipe.payload.RecipeRequestDTO;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
