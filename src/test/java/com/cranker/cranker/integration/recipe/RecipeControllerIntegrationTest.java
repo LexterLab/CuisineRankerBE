@@ -1,6 +1,9 @@
 package com.cranker.cranker.integration.recipe;
 
+import com.cranker.cranker.ingredient.AmountType;
+import com.cranker.cranker.ingredient.IngredientDTO;
 import com.cranker.cranker.integration.BaseIntegrationTest;
+import com.cranker.cranker.recipe.payload.RecipeDTO;
 import com.cranker.cranker.recipe.payload.RecipeRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -197,5 +200,39 @@ public class RecipeControllerIntegrationTest extends BaseIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "user@gmail.com", roles = "USER")
+    void shouldRespondWithOKAndPersonalRecipeInfo() throws Exception {
+        long recipeId = 1L;
+        long ingredientId = 1L;
+
+        RecipeDTO recipeDetails = RecipeDTO.builder()
+                .name("Chicken Breasts")
+                .id(recipeId)
+                .build();
+
+        IngredientDTO ingredientDetails = IngredientDTO.builder()
+                .name("Chicken Breasts Oiled")
+                .id(ingredientId)
+                .amountType(AmountType.MG.getName())
+                .build();
+
+        mockMvc.perform(get("/api/v1/recipes/personal/{recipeId}", recipeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.recipeDetails.name").value(recipeDetails.name()))
+                .andExpect(jsonPath("$.recipeDetails.id").value(recipeDetails.id()))
+                .andExpect(jsonPath("$.ingredients[0].name").value(ingredientDetails.name()))
+                .andExpect(jsonPath("$.ingredients[0].id").value(ingredientDetails.id()))
+                .andExpect(jsonPath("$.ingredients[0].amountType").value(ingredientDetails.amountType()));
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenRetrievingPersonalRecipeWithoutAuthentication() throws Exception {
+        long recipeId = 1L;
+
+        mockMvc.perform(get("/api/v1/recipes/personal/{recipeId}", recipeId))
+                .andExpect(status().isForbidden());
     }
 }
