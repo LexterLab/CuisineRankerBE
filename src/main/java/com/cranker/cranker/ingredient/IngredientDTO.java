@@ -1,7 +1,9 @@
 package com.cranker.cranker.ingredient;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 
+@Builder
 public record IngredientDTO(
         @Schema(example = "1")
         Long id,
