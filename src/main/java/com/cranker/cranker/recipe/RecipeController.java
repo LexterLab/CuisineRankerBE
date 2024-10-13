@@ -1,6 +1,10 @@
 package com.cranker.cranker.recipe;
 
+import com.cranker.cranker.recipe.payload.RecipeDTO;
+import com.cranker.cranker.recipe.payload.RecipeInfo;
+import com.cranker.cranker.recipe.payload.RecipeRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -83,5 +87,28 @@ public class RecipeController {
     public ResponseEntity<RecipeDTO> createPersonalRecipe(Authentication authentication, @Valid @RequestBody RecipeRequestDTO requestDTO) {
         return new ResponseEntity<>(recipeService
                 .createPersonalRecipe(authentication.getName(), requestDTO), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Get personal recipe REST API",
+            description = "Get personal recipe REST API is used to retrieve User's personal recipe"
+    )
+    @ApiResponses( value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP STATUS 200 SUCCESS", content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = RecipeInfo.class))
+            ),
+            @ApiResponse( responseCode = "401", description = "Http Status 401 UNAUTHORIZED"),
+            @ApiResponse( responseCode = "403", description = "Http Status 403 FORBIDDEN"),
+            @ApiResponse( responseCode = "404", description = "Http Status 404 NOT FOUND")
+    })
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("personal/{recipeId}")
+    public ResponseEntity<RecipeInfo> getPersonalRecipe(Authentication authentication, @PathVariable @Schema(example = "1") Long recipeId) {
+        return new ResponseEntity<>(recipeService.getRecipeInfo(authentication.getName(), recipeId), HttpStatus.OK);
     }
 }

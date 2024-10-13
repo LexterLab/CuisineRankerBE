@@ -1,9 +1,11 @@
-package com.cranker.cranker.recipe;
+package com.cranker.cranker.recipe.payload;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
+@Builder
 public record RecipeDTO
         (
                 @Schema(example = "1")

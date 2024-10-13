@@ -4,6 +4,10 @@ import com.cranker.cranker.exception.APIException;
 import com.cranker.cranker.exception.ResourceNotFoundException;
 import com.cranker.cranker.ingredient.Ingredient;
 import com.cranker.cranker.ingredient.IngredientRepository;
+import com.cranker.cranker.recipe.payload.RecipeDTO;
+import com.cranker.cranker.recipe.payload.RecipeInfo;
+import com.cranker.cranker.recipe.payload.RecipeRequestDTO;
+import com.cranker.cranker.recipe.payload.mapper.RecipeMapper;
 import com.cranker.cranker.user.model.User;
 import com.cranker.cranker.user.repository.UserRepository;
 import com.cranker.cranker.utils.Messages;
@@ -83,5 +87,22 @@ public class RecipeService {
 
         logger.info("Created personal recipe: {}, by User:{}", recipe.getName(), email);
         return RecipeMapper.INSTANCE.entityToDTO(recipeRepository.save(recipe));
+    }
+
+    public RecipeInfo getRecipeInfo(String email, Long recipeId) {
+        User user = userRepository.findUserByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+        Recipe recipe = recipeRepository.findByIdAndUserId(recipeId, user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "recipeId & userId",
+                        recipeId + ":" + user.getId()));
+
+        RecipeDTO recipeDetails = RecipeMapper.INSTANCE.entityToDTO(recipe);
+
+        return new RecipeInfo(
+                recipeDetails,
+                RecipeMapper.INSTANCE.recipeIngredientToRecipeIngredientInfo(recipe.getRecipeIngredients())
+        );
+
     }
 }
